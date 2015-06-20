@@ -860,54 +860,77 @@ def dfa(X, Ave = None, L = None):
     
     return Alpha
 
-def permutation_entropy(x,n):
-    '''
-    Compute Permutation Entropy of a given time series X, specified by n.
 
+def permutation_entropy(x,n,tau):
+    """Compute Permutation Entropy of a given time series x, specified by permutation
+    order n and embedding lag tau.
+
+    Parameters
+    ----------
+    
+    x
+        list
+        
+        a time series
+        
+    n
+        integer
+        
+        Permutation order
+        
+    tau
+        integer
+        
+        Embedding lag
+
+    Returns
+    ----------
+    
+    PE
+       float
+
+       permutation entropy
+        
+    Notes
+    ----------    
     Suppose the given time series is X =[x(1),x(2),x(3),x(N)].
     We first build embedding matrix Em, of dimension(n*N-n+1),
     such that the ith row of Em is x(i),x(i+1),..x(i+n-1). Hence
     the embedding lag and the embedding dimension are 1 and n
     respectively. We build this matrix from a given time series,
-    X, by calling pyEEg function embed_seq (x,1,n).
-
+    X, by calling pyEEg function embed_seq(x,1,n).
+    
     We then transform each row of the embedding matrix into
-    a new sequence comprising a set of integers in range of 0,..,n-1.
-    The new sequence replacing a row, preserves the order of the
-    elements in the row.  Therefore after the transform we have a new
-    embedding matrix, called PeSeq, in which each row is comprised of
-    set of integers in range of 0,..,n-1. And the order in which the
-    integers are placed within a row is the same as those of the
-    original elements.
-
-    To calculate the Permutation entropy of a given time series, we
-    calculate the entropy of PeSeq.  To do so, we first count the number
-    of occurrences of each permutation in PeSeq and write it in a sequence,
-    RankMat. We then use this sequence to calculate entropy by using Shanons
-    entropy formula.
-
-
-    Notes
-    ==============
-
+    a new sequence, comprising a set of integers in range of 0,..,n-1.
+    The order in which the integers are placed within a row is the
+    same as those of the original elements:0 is placed where the smallest
+    element of the row was and n-1 replaces the largest element of the row.
+    
+    To calculate the Permutation entropy, we calculate the entropy of PeSeq.
+    In doing so, we count the number of occurrences of each permutation
+    in PeSeq and write it in a sequence, RankMat. We then use this sequence to
+    calculate entropy by using Shanons entropy formula.
+    
     Permutation entropy is usually calculated with n in range of 3 and 7. 
-    A permutation entropy close to zero means that the time series is
-    either strictly increasing (or decreasing) function. While a permutation-
-    entropy close to log(n!) emphasizes the random nature of the process.
-   
-    Author of this function is Borzou Fard. 
-
+    
     References
-    ================
-
+    ----------
     Bandt, Christoph, and Bernd Pompe. "Permutation entropy: a natural complexity
     measure for time series." Physical Review Letters 88.17 (2002): 174102.
+    
+    
+    Examples
+    ----------
+    >>> import pyeeg
+    >>> x = [1,2,4,5,12,3,4,5]
+    >>> pyeeg.permutation_entropy(x,5,1)
+    >>> 2.0
 
-
-    '''
+    """
     
     PeSeq = []
-    Em = embed_seq(x, 1, n)
+    Em = embed_seq(x, tau, n)
+    
     
     for i in range(0, len(Em)):
         r = []
@@ -915,6 +938,7 @@ def permutation_entropy(x,n):
         
         for j in range(0, len(Em[i])):
             z.append(Em[i][j])
+    
 
         for j in range(0, len(Em[i])):
             z.sort()
@@ -922,6 +946,8 @@ def permutation_entropy(x,n):
             z[z.index(Em[i][j])]= -1
             
         PeSeq.append(r)
+        
+ 
     
     RankMat = []
     
@@ -930,9 +956,186 @@ def permutation_entropy(x,n):
         x= PeSeq[0]
         for j in range(0,  PeSeq.count(PeSeq[0])):
             PeSeq.pop(PeSeq.index(x))
-            
+     
     RankMat = np.array(RankMat)        
     RankMat = np.ma.true_divide(RankMat, RankMat.sum())
     EntropyMat = np.multiply(np.ma.log2(RankMat), RankMat)
+    PE = -1*EntropyMat.sum()
 
-    return -1*EntropyMat.sum()
+    return PE
+	
+def information_based_similarity(x,y,n):
+    """Calculates the information based similarity of two time series x
+    and y.
+
+    Parameters
+    ----------
+    
+    x
+    
+        list
+        
+        a time series
+        
+    y
+    
+        list
+        
+        a time series
+        
+    n
+    
+        integer
+
+        word order
+
+
+    Returns
+    ----------
+    IBS
+    
+        float
+        
+        Information based similarity
+        
+
+    Notes
+    ----------
+    Information based similarity is a measure of dissimilarity between
+    two time series. Let the sequences be x and y. Each sequence is first replaced by
+    its first ordered difference(Encoder). Calculating the Heaviside of the resulting
+    sequences, we get two binary sequences, SymbolicSeq. Using PyEEG function, embed_seq,
+    with lag of 1 and dimension of n, we build an embedding matrix from the latter sequence.
+    Each row of this embedding matrix is called a word. Information based similarity measures
+    the distance between two sequence by comparing the rank of words in the sequences; more
+    explicitly, the distance, D, is calculated using the formula:
+    "1/2^(n-1) * sum( abs(Rank(0)(k)-R(1)(k)) * F(k) )" where Rank(0)(k) and Rank(1)(k)
+    are the rank of the k-th word in each of the input sequences. F(k) is a modified
+    "shannon" weighing function that increases the weight of each word in the calculations
+    when they are more frequent in the sequences.
+    
+    It is advisable to calculate IBS for numerical sequences using 8-tupple words.
+
+    References
+    ----------
+    Yang AC, Hseu SS, Yien HW, Goldberger AL, Peng CK: Linguistic analysis of the
+    human heartbeat using frequency and rank order statistics. Phys Rev Lett 2003, 90: 108103
+
+    
+    Examples
+    ----------
+    >>> import pyeeg
+    >>> from numpy.random import randn
+    >>> x = randn(100)
+    >>> y = randn(100)
+    >>> pyeeg.information_based_similarity(x,y,8)
+    
+    """
+
+
+    Wordlist = []
+    Space = [[0,0],[0,1],[1,0],[1,1]]
+    Sample = [0,1]
+    
+    if (n==1):
+        Wordlist = Sample
+        
+    if (n==2):
+        Wordlist = Space
+        
+    elif (n > 1):
+        Wordlist =Space
+        Buff =[]
+        for k in  range(0, n-2):
+            Buff =[]
+            
+            for i in range(0, len(Wordlist)):
+                Buff.append(tuple(Wordlist[i]))
+            Buff = tuple(Buff) 
+
+            
+            Wordlist =[]    
+            for i in range(0, len(Buff)):
+                for j in range(0, len(Sample)):
+                    Wordlist.append(list(Buff[i]))
+                    Wordlist[len(Wordlist)-1].append(Sample[j])
+
+    Wordlist.sort()
+
+    Input =[[],[]]
+    Input[0] =x
+    Input[1] =y
+
+    SymbolicSeq =[[],[]]
+    for i in range(0, 2):
+        Encoder = Difference(Input[i],1)
+        for j in range(0 ,len(Input[i])-1):
+            if(Encoder[j]>0):
+                SymbolicSeq[i].append(1)
+            else:
+                SymbolicSeq[i].append(0)
+
+
+
+    Wm =[]
+    Wm.append(embed_seq(SymbolicSeq[0], 1, n).tolist())
+    Wm.append(embed_seq(SymbolicSeq[1], 1, n).tolist())
+      
+    
+
+    Count =[[],[]]
+    for i in range(0, 2):
+        for k in range(0, len(Wordlist)):
+            Count[i].append(Wm[i].count(Wordlist[k]))
+  
+
+    Prob = [[],[]]
+    for i in range(0,2):
+        Sigma =0
+        for j in range(0, len(Wordlist)):
+            Sigma += Count[i][j]
+        for k in range(0, len(Wordlist)):
+            Prob[i].append(np.ma.true_divide(Count[i][k],Sigma))
+
+
+
+    Entropy =[[],[]]
+    for i in range(0,2):
+        for k in range(0, len(Wordlist)):
+            if (Prob[i][k]==0):
+                Entropy[i].append(0)
+            else:
+                Entropy[i].append(Prob[i][k] * (np.ma.log2(Prob[i][k])))
+
+
+        
+
+    Rank =[[],[]]
+    Buff = [[],[]]
+    Buff[0] =tuple(Count[0])
+    Buff[1] =tuple(Count[1])    
+    for i in range(0, 2):
+        Count[i].sort()
+        Count[i].reverse()
+        for k in range(0, len(Wordlist)):
+            Rank[i].append(Count[i].index(Buff[i][k]))
+            Count[i][Count[i].index(Buff[i][k])] = -1
+ 
+
+    IBS=0
+    Z=0
+    n=0
+    for k in range(0, len(Wordlist)):
+        if ((Buff[0][k] != 0) & (Buff[1][k] != 0)):
+            F = -Entropy[0][k]-Entropy[1][k]
+            IBS += np.multiply(np.ma.absolute(Rank[0][k]-Rank[1][k]), F)
+            Z += F
+        else:
+            n+=1
+            
+
+    IBS = np.ma.true_divide(IBS, Z)
+    IBS = np.ma.true_divide(IBS,len(Wordlist)-n)
+          
+    
+    return IBS
