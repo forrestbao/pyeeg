@@ -315,7 +315,7 @@ def pfd(X, D=None):
     """
     if D is None:                                                                                        
         D = diff(X)
-		D = D.tolist() 
+	D = D.tolist() 
     N_delta= 0; #number of sign changes in derivative of the signal
     for i in xrange(1,len(D)):
         if D[i]*D[i-1]<0:
@@ -384,7 +384,7 @@ def hjorth(X, D = None):
     
     if D is None:
         D = diff(X)
-		D = D.tolist()
+	D = D.tolist()
 
     D.insert(0, X[0]) # pad the first difference
     D = array(D)
