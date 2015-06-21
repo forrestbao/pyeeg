@@ -32,7 +32,7 @@ Functions listed alphabetically
 
 from numpy.fft import fft
 from numpy import zeros, floor, log10, log, mean, array, sqrt, vstack, cumsum, \
-                  ones, log2, std
+                  ones, log2, std, diff
 from numpy.linalg import svd, lstsq
 import time
 
@@ -299,20 +299,6 @@ def bin_power(X,Band,Fs):
     Power_Ratio = Power/sum(Power)
     return Power, Power_Ratio    
 
-def first_order_diff(X):
-    """ Compute the first order difference of a time series.
-
-        For a time series X = [x(1), x(2), ... , x(N)], its    first order 
-        difference is:
-        Y = [x(2) - x(1) , x(3) - x(2), ..., x(N) - x(N-1)]
-        
-    """
-    D=[]
-    
-    for i in xrange(1,len(X)):
-        D.append(X[i]-X[i-1])
-
-    return D
 
 def pfd(X, D=None):
     """Compute Petrosian Fractal Dimension of a time series from either two 
@@ -321,14 +307,15 @@ def pfd(X, D=None):
         2. D, the first order differential sequence of X (if D is provided, 
            recommended to speed up)
 
-    In case 1, D is computed by first_order_diff(X) function of pyeeg
+    In case 1, D is computed using Numpy's difference function.
 
     To speed up, it is recommended to compute D before calling this function 
     because D may also be used by other functions whereas computing it here 
     again will slow down.
     """
     if D is None:                                                                                        
-        D = first_order_diff(X)
+        D = diff(X)
+		D = D.tolist() 
     N_delta= 0; #number of sign changes in derivative of the signal
     for i in xrange(1,len(D)):
         if D[i]*D[i-1]<0:
@@ -365,7 +352,7 @@ def hjorth(X, D = None):
         2. D, a first order differential sequence of X (if D is provided, 
            recommended to speed up)
 
-    In case 1, D is computed by first_order_diff(X) function of pyeeg
+    In case 1, D is computed using Numpy's Difference function.
 
     Notes
     -----
@@ -396,7 +383,8 @@ def hjorth(X, D = None):
     """
     
     if D is None:
-        D = first_order_diff(X)
+        D = diff(X)
+		D = D.tolist()
 
     D.insert(0, X[0]) # pad the first difference
     D = array(D)
@@ -957,9 +945,9 @@ def permutation_entropy(x,n,tau):
         for j in range(0,  PeSeq.count(PeSeq[0])):
             PeSeq.pop(PeSeq.index(x))
      
-    RankMat = np.array(RankMat)        
-    RankMat = np.ma.true_divide(RankMat, RankMat.sum())
-    EntropyMat = np.multiply(np.ma.log2(RankMat), RankMat)
+    RankMat = array(RankMat)        
+    RankMat = true_divide(RankMat, RankMat.sum())
+    EntropyMat = multiply(log2(RankMat), RankMat)
     PE = -1*EntropyMat.sum()
 
     return PE
@@ -1068,7 +1056,7 @@ def information_based_similarity(x,y,n):
 
     SymbolicSeq =[[],[]]
     for i in range(0, 2):
-        Encoder = Difference(Input[i],1)
+        Encoder = diff(Input[i])
         for j in range(0 ,len(Input[i])-1):
             if(Encoder[j]>0):
                 SymbolicSeq[i].append(1)
@@ -1095,7 +1083,7 @@ def information_based_similarity(x,y,n):
         for j in range(0, len(Wordlist)):
             Sigma += Count[i][j]
         for k in range(0, len(Wordlist)):
-            Prob[i].append(np.ma.true_divide(Count[i][k],Sigma))
+            Prob[i].append(true_divide(Count[i][k],Sigma))
 
 
 
@@ -1105,7 +1093,7 @@ def information_based_similarity(x,y,n):
             if (Prob[i][k]==0):
                 Entropy[i].append(0)
             else:
-                Entropy[i].append(Prob[i][k] * (np.ma.log2(Prob[i][k])))
+                Entropy[i].append(Prob[i][k] * (log2(Prob[i][k])))
 
 
         
@@ -1128,14 +1116,14 @@ def information_based_similarity(x,y,n):
     for k in range(0, len(Wordlist)):
         if ((Buff[0][k] != 0) & (Buff[1][k] != 0)):
             F = -Entropy[0][k]-Entropy[1][k]
-            IBS += np.multiply(np.ma.absolute(Rank[0][k]-Rank[1][k]), F)
+            IBS += multiply(absolute(Rank[0][k]-Rank[1][k]), F)
             Z += F
         else:
             n+=1
             
 
-    IBS = np.ma.true_divide(IBS, Z)
-    IBS = np.ma.true_divide(IBS,len(Wordlist)-n)
+    IBS = true_divide(IBS, Z)
+    IBS = true_divide(IBS,len(Wordlist)-n)
           
     
     return IBS
