@@ -29,11 +29,7 @@ Functions listed alphabetically
 --------------------------------------------------
 
 """
-
-from numpy.fft import fft
-from numpy import zeros, floor, log10, log, mean, array, sqrt, vstack, cumsum, \
-                  ones, log2, std, diff
-from numpy.linalg import svd, lstsq
+import numpy
 import time
 
 ######################## Begin function definitions #######################
@@ -77,22 +73,23 @@ def hurst(X):
     
     N = len(X)
     
-    T = array([float(i) for i in xrange(1,N+1)])
-    Y = cumsum(X)
+    T = numpy.array([float(i) for i in xrange(1,N+1)])
+    Y = numpy.cumsum(X)
     Ave_T = Y/T
     
-    S_T = zeros((N))
-    R_T = zeros((N))
+    S_T = numpy.zeros((N))
+    R_T = numpy.zeros((N))
     for i in xrange(N):
-        S_T[i] = std(X[:i+1])
+        S_T[i] = numpy.std(X[:i+1])
         X_T = Y - T * Ave_T[i]
         R_T[i] = max(X_T[:i + 1]) - min(X_T[:i + 1])
     
     R_S = R_T / S_T
-    R_S = log(R_S)
-    n = log(T).reshape(N, 1)
-    H = lstsq(n[1:], R_S[1:])[0]
+    R_S = numpy.log(R_S)
+    n = numpy.log(T).reshape(N, 1)
+    H = numpy.linalg.lstsq(n[1:], R_S[1:])[0]
     return H[0]
+
 
 def embed_seq(X,Tau,D):
     """Build a set of embedding sequences from given time series X with lag Tau
@@ -168,11 +165,12 @@ def embed_seq(X,Tau,D):
         print "Tau has to be at least 1"
         exit()
 
-    Y=zeros((N - (D - 1) * Tau, D))
+    Y = numpy.zeros((N - (D - 1) * Tau, D))
     for i in xrange(0, N - (D - 1) * Tau):
         for j in xrange(0, D):
             Y[i][j] = X[i + j * Tau]
     return Y
+
 
 def in_range(Template, Scroll, Distance):
     """Determines whether one vector is the the range of another vector.
@@ -289,13 +287,13 @@ def bin_power(X,Band,Fs):
 
     """
 
-    C = fft(X)
+    C = numpy.fft.fft(X)
     C = abs(C)
-    Power =zeros(len(Band)-1);
+    Power =numpy.zeros(len(Band)-1);
     for Freq_Index in xrange(0,len(Band)-1):
         Freq = float(Band[Freq_Index])                    
         Next_Freq = float(Band[Freq_Index+1])
-        Power[Freq_Index] = sum(C[floor(Freq/Fs*len(X)):floor(Next_Freq/Fs*len(X))])
+        Power[Freq_Index] = sum(C[numpy.floor(Freq/Fs*len(X)):numpy.floor(Next_Freq/Fs*len(X))])
     Power_Ratio = Power/sum(Power)
     return Power, Power_Ratio    
 
@@ -314,14 +312,14 @@ def pfd(X, D=None):
     again will slow down.
     """
     if D is None:                                                                                        
-        D = diff(X)
-	D = D.tolist() 
+        D = numpy.diff(X)
+        D = D.tolist() 
     N_delta= 0; #number of sign changes in derivative of the signal
     for i in xrange(1,len(D)):
         if D[i]*D[i-1]<0:
             N_delta += 1
     n = len(X)
-    return log10(n)/(log10(n)+log10(n/n+0.4*N_delta))
+    return numpy.log10(n)/(numpy.log10(n)+numpy.log10(n/n+0.4*N_delta))
 
 
 def hfd(X, Kmax):
@@ -335,14 +333,14 @@ def hfd(X, Kmax):
         Lk = []
         for m in xrange(0,k):
             Lmk = 0
-            for i in xrange(1,int(floor((N-m)/k))):
+            for i in xrange(1,int(numpy.floor((N-m)/k))):
                 Lmk += abs(X[m+i*k] - X[m+i*k-k])
-            Lmk = Lmk*(N - 1)/floor((N - m) / float(k)) / k
+            Lmk = Lmk*(N - 1)/numpy.floor((N - m) / float(k)) / k
             Lk.append(Lmk)
-        L.append(log(mean(Lk)))
-        x.append([log(float(1) / k), 1])
+        L.append(numpy.log(numpy.mean(Lk)))
+        x.append([numpy.log(float(1) / k), 1])
     
-    (p, r1, r2, s)=lstsq(x, L)
+    (p, r1, r2, s)= numpy.linalg.lstsq(x, L)
     return p[0]
 
 def hjorth(X, D = None):
@@ -383,22 +381,22 @@ def hjorth(X, D = None):
     """
     
     if D is None:
-        D = diff(X)
-	D = D.tolist()
+        D = numpy.diff(X)
+        D = D.tolist()
 
     D.insert(0, X[0]) # pad the first difference
-    D = array(D)
+    D = numpy.array(D)
 
     n = len(X)
 
     M2 = float(sum(D ** 2)) / n
-    TP = sum(array(X) ** 2)
+    TP = sum(numpy.array(X) ** 2)
     M4 = 0;
     for i in xrange(1, len(D)):
         M4 += (D[i] - D[i - 1]) ** 2
     M4 = M4 / n
     
-    return sqrt(M2 / TP), sqrt(float(M4) * TP / M2 / M2)    # Hjorth Mobility and Complexity
+    return numpy.sqrt(M2 / TP), numpy.sqrt(float(M4) * TP / M2 / M2)    # Hjorth Mobility and Complexity
 
 def spectral_entropy(X, Band, Fs, Power_Ratio = None):
     """Compute spectral entropy of a time series from either two cases below:
@@ -454,8 +452,8 @@ def spectral_entropy(X, Band, Fs, Power_Ratio = None):
 
     Spectral_Entropy = 0
     for i in xrange(0, len(Power_Ratio) - 1):
-        Spectral_Entropy += Power_Ratio[i] * log(Power_Ratio[i])
-    Spectral_Entropy /= log(len(Power_Ratio))    # to save time, minus one is omitted
+        Spectral_Entropy += Power_Ratio[i] * numpy.log(Power_Ratio[i])
+    Spectral_Entropy /= numpy.log(len(Power_Ratio))    # to save time, minus one is omitted
     return -1 * Spectral_Entropy
 
 def svd_entropy(X, Tau, DE, W = None):
@@ -486,85 +484,45 @@ def svd_entropy(X, Tau, DE, W = None):
     """
 
     if W is None:
-        Y = EmbedSeq(X, tau, dE)
-        W = svd(Y, compute_uv = 0)
+        Y = embed_seq(X, Tau, DE)
+        W = numpy.linalg.svd(Y, compute_uv = 0)
         W /= sum(W) # normalize singular values
 
-    return -1*sum(W * log(W))
+    return -1*sum(W * numpy.log(W))
 
 def fisher_info(X, Tau, DE, W = None):
-    """ Compute Fisher information of a time series from either two cases below:
-    1. X, a time series, with lag Tau and embedding dimension DE (default)
-    2. W, a list of normalized singular values, i.e., singular spectrum (if W is
-       provided, recommended to speed up.)
+    """Compute SVD Entropy from either two cases below:
+    1. a time series X, with lag tau and embedding dimension dE (default)
+    2. a list, W, of normalized singular values of a matrix (if W is provided,
+    recommend to speed up.)
 
     If W is None, the function will do as follows to prepare singular spectrum:
 
         First, computer an embedding matrix from X, Tau and DE using pyeeg 
-        function embed_seq():
-            M = embed_seq(X, Tau, DE)
+        function embed_seq(): 
+                    M = embed_seq(X, Tau, DE)
 
         Second, use scipy.linalg function svd to decompose the embedding matrix 
         M and obtain a list of singular values:
-            W = svd(M, compute_uv=0)
+                    W = svd(M, compute_uv=0)
 
         At last, normalize W:
-            W /= sum(W)
+                    W /= sum(W)
     
-    Parameters
-    ----------
-
-    X
-        list
-
-        a time series. X will be used to build embedding matrix and compute 
-        singular values if W or M is not provided.
-    Tau
-        integer
-
-        the lag or delay when building a embedding sequence. Tau will be used 
-        to build embedding matrix and compute singular values if W or M is not
-        provided.
-    DE
-        integer
-
-        the embedding dimension to build an embedding matrix from a given 
-        series. DE will be used to build embedding matrix and compute 
-        singular values if W or M is not provided.
-    W
-        list or array
-
-        the set of singular values, i.e., the singular spectrum
-
-    Returns
-    -------
-
-    FI
-        integer
-
-        Fisher information
-
     Notes
-    -----
+    -------------
+
     To speed up, it is recommended to compute W before calling this function 
     because W may also be used by other functions whereas computing    it here 
     again will slow down.
-
-    See Also
-    --------
-    embed_seq : embed a time series into a matrix
     """
 
     if W is None:
-        M = embed_seq(X, Tau, DE)
-        W = svd(M, compute_uv = 0)
-        W /= sum(W)    
-    
-    FI = 0
-    for i in xrange(0, len(W) - 1):    # from 1 to M
-        FI += ((W[i +1] - W[i]) ** 2) / (W[i])
-    
-    return FI
+        Y = embed_seq(X, Tau, DE)
+        W = numpy.linalg.svd(Y, compute_uv = 0)
+        W /= sum(W) # normalize singular values
+
+    return -1*sum(W * numpy.log(W))
 
 def ap_entropy(X, M, R):
     """Computer approximate entropy (ApEN) of series X, specified by M and R.
@@ -627,7 +585,7 @@ def ap_entropy(X, M, R):
     Em = embed_seq(X, 1, M)    
     Emp = embed_seq(X, 1, M + 1) #    try to only build Emp to save time
 
-    Cm, Cmp = zeros(N - M + 1), zeros(N - M)
+    Cm, Cmp = numpy.zeros(N - M + 1), numpy.zeros(N - M)
     # in case there is 0 after counting. Log(0) is undefined.
 
     for i in xrange(0, N - M):
@@ -654,7 +612,7 @@ def ap_entropy(X, M, R):
     Cm /= (N - M +1 )
     Cmp /= ( N - M )
 #    import code;code.interact(local=locals())
-    Phi_m, Phi_mp = sum(log(Cm)),  sum(log(Cmp))
+    Phi_m, Phi_mp = sum(numpy.log(Cm)),  sum(numpy.log(Cmp))
 
     Ap_En = (Phi_m - Phi_mp) / (N - M)
 
@@ -712,7 +670,7 @@ def samp_entropy(X, M, R):
     Em = embed_seq(X, 1, M)    
     Emp = embed_seq(X, 1, M + 1)
 
-    Cm, Cmp = zeros(N - M - 1) + 1e-100, zeros(N - M - 1) + 1e-100
+    Cm, Cmp = numpy.zeros(N - M - 1) + 1e-100, numpy.zeros(N - M - 1) + 1e-100
     # in case there is 0 after counting. Log(0) is undefined.
 
     for i in xrange(0, N - M):
@@ -724,7 +682,7 @@ def samp_entropy(X, M, R):
                 if abs(Emp[i][-1] - Emp[j][-1]) <= R: # check last one
                     Cmp[i] += 1
 
-    Samp_En = log(sum(Cm)/sum(Cmp))
+    Samp_En = numpy.log(sum(Cm)/sum(Cmp))
 
     return Samp_En
 
@@ -816,18 +774,18 @@ def dfa(X, Ave = None, L = None):
 
     """
 
-    X = array(X)
+    X = numpy.array(X)
 
     if Ave is None:
-        Ave = mean(X)
+        Ave = numpy.mean(X)
 
-    Y = cumsum(X)
+    Y = numpy.cumsum(X)
     Y -= Ave
 
     if L is None:
-        L = floor(len(X)*1/(2**array(range(4,int(log2(len(X)))-4))))
+        L = numpy.floor(len(X)*1/(2**numpy.array(range(4,int(numpy.log2(len(X)))-4))))
 
-    F = zeros(len(L)) # F(n) of different given box length n
+    F = numpy.zeros(len(L)) # F(n) of different given box length n
 
     for i in xrange(0,len(L)):
         n = int(L[i])                        # for each box length L[i]
@@ -838,13 +796,13 @@ def dfa(X, Ave = None, L = None):
         for j in xrange(0,len(X),n): # for each box
             if j+n < len(X):
                 c = range(j,j+n)
-                c = vstack([c, ones(n)]).T # coordinates of time in the box
+                c = numpy.vstack([c, ones(n)]).T # coordinates of time in the box
                 y = Y[j:j+n]                # the value of data in the box
-                F[i] += lstsq(c,y)[1]    # add residue in this box
+                F[i] += numpy.linalg.lstsq(c,y)[1]    # add residue in this box
         F[i] /= ((len(X)/n)*n)
-    F = sqrt(F)
+    F = numpy.sqrt(F)
     
-    Alpha = lstsq(vstack([log(L), ones(len(L))]).T,log(F))[0][0]
+    Alpha = numpy.linalg.lstsq(numpy.vstack([numpy.log(L), numpy.ones(len(L))]).T,numpy.log(F))[0][0]
     
     return Alpha
 
@@ -945,9 +903,9 @@ def permutation_entropy(x,n,tau):
         for j in range(0,  PeSeq.count(PeSeq[0])):
             PeSeq.pop(PeSeq.index(x))
      
-    RankMat = array(RankMat)        
-    RankMat = true_divide(RankMat, RankMat.sum())
-    EntropyMat = multiply(log2(RankMat), RankMat)
+    RankMat = numpy.array(RankMat)        
+    RankMat = numpy.true_divide(RankMat, RankMat.sum())
+    EntropyMat = numpy.multiply(numpy.log2(RankMat), RankMat)
     PE = -1*EntropyMat.sum()
 
     return PE
@@ -1056,7 +1014,7 @@ def information_based_similarity(x,y,n):
 
     SymbolicSeq =[[],[]]
     for i in range(0, 2):
-        Encoder = diff(Input[i])
+        Encoder = numpy.diff(Input[i])
         for j in range(0 ,len(Input[i])-1):
             if(Encoder[j]>0):
                 SymbolicSeq[i].append(1)
@@ -1083,7 +1041,7 @@ def information_based_similarity(x,y,n):
         for j in range(0, len(Wordlist)):
             Sigma += Count[i][j]
         for k in range(0, len(Wordlist)):
-            Prob[i].append(true_divide(Count[i][k],Sigma))
+            Prob[i].append(numpy.true_divide(Count[i][k],Sigma))
 
 
 
@@ -1093,7 +1051,7 @@ def information_based_similarity(x,y,n):
             if (Prob[i][k]==0):
                 Entropy[i].append(0)
             else:
-                Entropy[i].append(Prob[i][k] * (log2(Prob[i][k])))
+                Entropy[i].append(Prob[i][k] * (numpy.log2(Prob[i][k])))
 
 
         
@@ -1116,14 +1074,16 @@ def information_based_similarity(x,y,n):
     for k in range(0, len(Wordlist)):
         if ((Buff[0][k] != 0) & (Buff[1][k] != 0)):
             F = -Entropy[0][k]-Entropy[1][k]
-            IBS += multiply(absolute(Rank[0][k]-Rank[1][k]), F)
+            IBS += numpy.multiply(numpy.absolute(Rank[0][k]-Rank[1][k]), F)
             Z += F
         else:
             n+=1
             
 
-    IBS = true_divide(IBS, Z)
-    IBS = true_divide(IBS,len(Wordlist)-n)
+    IBS = numpy.true_divide(IBS, Z)
+    IBS = numpy.true_divide(IBS,len(Wordlist)-n)
           
     
     return IBS
+
+
