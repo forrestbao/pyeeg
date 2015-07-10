@@ -8,7 +8,7 @@ Project homepage: http://pyeeg.org
 
 **Data structure**
 
-PyEEG only uses standard Python and numpy data structures,d
+PyEEG only uses standard Python and numpy data structures,
 so you need to import numpy before using it.
 For numpy, please visit http://numpy.scipy.org
 
@@ -315,8 +315,8 @@ def pfd(X, D=None):
     """
     if D is None:
         D = numpy.diff(X)
-        D = D.tolist() 
-    N_delta = 0;  # number of sign changes in derivative of the signal
+        D = D.tolist()
+    N_delta = 0  # number of sign changes in derivative of the signal
     for i in xrange(1, len(D)):
         if D[i] * D[i - 1] < 0:
             N_delta += 1
@@ -330,7 +330,7 @@ def hfd(X, Kmax):
     """ Compute Hjorth Fractal Dimension of a time series X, kmax
      is an HFD parameter
     """
-    L = [];
+    L = []
     x = []
     N = len(X)
     for k in xrange(1, Kmax):
@@ -396,7 +396,7 @@ def hjorth(X, D=None):
 
     M2 = float(sum(D ** 2)) / n
     TP = sum(numpy.array(X) ** 2)
-    M4 = 0;
+    M4 = 0
     for i in xrange(1, len(D)):
         M4 += (D[i] - D[i - 1]) ** 2
     M4 = M4 / n
