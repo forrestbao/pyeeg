@@ -289,7 +289,7 @@ def bin_power(X, Band, Fs):
 
     C = numpy.fft.fft(X)
     C = abs(C)
-    Power = numpy.zeros(len(Band) - 1);
+    Power = numpy.zeros(len(Band) - 1)
     for Freq_Index in xrange(0, len(Band) - 1):
         Freq = float(Band[Freq_Index])
         Next_Freq = float(Band[Freq_Index + 1])
