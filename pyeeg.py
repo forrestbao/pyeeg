@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 """Copyleft 2010-2015 Forrest Sheng Bao http://fsbao.net
    Copyleft 2010 Xin Liu
    Copyleft 2014-2015 Borzou Alipour Fard
