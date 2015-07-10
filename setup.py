@@ -7,6 +7,7 @@ setup(
     url='https://github.com/forrestbao/pyeeg',
     author='Forrest Bao',
     license='GNU v3',
+    packages=['pyeeg'],
     install_requires=[
         'numpy>=1.9.2',
     ],
