@@ -8,7 +8,7 @@ Project homepage: http://pyeeg.org
 
 **Data structure**
 
-PyEEG only uses standard Python and numpy data structures,
+PyEEG only uses standard Python and numpy data structures,d
 so you need to import numpy before using it.
 For numpy, please visit http://numpy.scipy.org
 
@@ -534,7 +534,7 @@ def ap_entropy(X, M, R):
     as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only 
     difference with Em is that the length of each embedding sequence is M + 1
 
-    Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elments 
+    Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elements 
     are    Em[i][k] and Em[j][k] respectively. The distance between Em[i] and Em[j]
     is defined as 1) the maximum difference of their corresponding scalar 
     components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two 1-D
@@ -568,7 +568,7 @@ def ap_entropy(X, M, R):
     References
     ----------
 
-    Costa M, Goldberger AL, Peng CK, Multiscale entropy analysis of biolgical
+    Costa M, Goldberger AL, Peng CK, Multiscale entropy analysis of biological
     signals, Physical Review E, 71:021906, 2005
 
     See also
@@ -630,7 +630,7 @@ def samp_entropy(X, M, R):
     as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only 
     difference with Em is that the length of each embedding sequence is M + 1
 
-    Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elments 
+    Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elements 
     are    Em[i][k] and Em[j][k] respectively. The distance between Em[i] and Em[j]
     is defined as 1) the maximum difference of their corresponding scalar 
     components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two 1-D
@@ -650,7 +650,7 @@ def samp_entropy(X, M, R):
     References
     ----------
 
-    Costa M, Goldberger AL, Peng C-K, Multiscale entropy analysis of biolgical
+    Costa M, Goldberger AL, Peng C-K, Multiscale entropy analysis of biological
     signals, Physical Review E, 71:021906, 2005
 
     See also
@@ -693,7 +693,7 @@ def dfa(X, Ave = None, L = None):
     The first step to compute DFA is to integrate the signal. Let original seres
     be X= [x(1), x(2), ..., x(N)]. 
 
-    The integrated signal Y = [y(1), y(2), ..., y(N)] is otained as follows
+    The integrated signal Y = [y(1), y(2), ..., y(N)] is obtained as follows
     y(k) = \sum_{i=1}^{k}{x(i)-Ave} where Ave is the mean of X. 
 
     The second step is to partition/slice/segment the integrated sequence Y into
