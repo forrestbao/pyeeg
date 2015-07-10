@@ -8,7 +8,7 @@ Project homepage: http://pyeeg.org
 
 **Data structure**
 
-PyEEG only uses standard Python and numpy data structures,d
+PyEEG only uses standard Python and numpy data structures,
 so you need to import numpy before using it.
 For numpy, please visit http://numpy.scipy.org
 
