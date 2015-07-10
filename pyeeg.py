@@ -69,7 +69,7 @@ def hurst(X):
     >>> from numpy.random import randn
     >>> a = randn(4096)
     >>> pyeeg.hurst(a)
-    >>> 0.5057444
+    0.5057444
 
     """
 
@@ -902,7 +902,7 @@ def permutation_entropy(x, n, tau):
     >>> import pyeeg
     >>> x = [1,2,4,5,12,3,4,5]
     >>> pyeeg.permutation_entropy(x,5,1)
-    >>> 2.0
+    2.0
 
     """
 
@@ -1011,6 +1011,7 @@ def information_based_similarity(x, y, n):
     >>> x = randn(100)
     >>> y = randn(100)
     >>> pyeeg.information_based_similarity(x,y,8)
+    0.64512947848249214
 
     """
 
