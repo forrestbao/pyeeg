@@ -206,17 +206,19 @@ def in_range(Template, Scroll, Distance):
     """ Desperate code, but do not delete
     def bit_in_range(Index):
         if abs(Scroll[Index] - Template[Bit]) <=  Distance :
-            print "Bit=", Bit, "Scroll[Index]", Scroll[Index], "Template[Bit]",\
-             Template[Bit], "abs(Scroll[Index] - Template[Bit])",\
+            print "Bit=", Bit, "Scroll[Index]", Scroll[Index], \
+             "Template[Bit]", Template[Bit], \
+             "abs(Scroll[Index] - Template[Bit])",\
              abs(Scroll[Index] - Template[Bit])
             return Index + 1 # move
 
     Match_No_Tail = range(0, len(Scroll) - 1) # except the last one
-#    print Match_No_Tail
+    #print Match_No_Tail
 
     # first compare Template[:-2] and Scroll[:-2]
 
-    for Bit in xrange(0, len(Template) - 1): # every bit of Template is in range of Scroll
+    # every bit of Template is in range of Scroll
+    for Bit in xrange(0, len(Template) - 1):
         Match_No_Tail = filter(bit_in_range, Match_No_Tail)
         print Match_No_Tail
 
@@ -541,19 +543,19 @@ def ap_entropy(X, M, R):
     """Computer approximate entropy (ApEN) of series X, specified by M and R.
 
     Suppose given time series is X = [x(1), x(2), ... , x(N)]. We first build
-    embedding matrix Em, of dimension (N-M+1)-by-M, such that the i-th row of Em
-    is x(i),x(i+1), ... , x(i+M-1). Hence, the embedding lag and dimension are
-    1 and M-1 respectively. Such a matrix can be built by calling pyeeg function
-    as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only
+    embedding matrix Em, of dimension (N-M+1)-by-M, such that the i-th row of
+    Em is x(i),x(i+1), ... , x(i+M-1). Hence, the embedding lag and dimension
+    are 1 and M-1 respectively. Such a matrix can be built by calling pyeeg
+    function as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only
     difference with Em is that the length of each embedding sequence is M + 1
 
     Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elements
-    are    Em[i][k] and Em[j][k] respectively. The distance between Em[i] and Em[j]
-    is defined as 1) the maximum difference of their corresponding scalar
-    components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two 1-D
-    vectors Em[i] and Em[j] *match* in *tolerance* R, if the distance between them
-    is no greater than R, thus, max(Em[i]-Em[j]) <= R. Mostly, the value of R is
-    defined as 20% - 30% of standard deviation of X.
+    are Em[i][k] and Em[j][k] respectively. The distance between Em[i] and
+    Em[j] is defined as 1) the maximum difference of their corresponding scalar
+    components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two
+    1-D vectors Em[i] and Em[j] *match* in *tolerance* R, if the distance
+    between them is no greater than R, thus, max(Em[i]-Em[j]) <= R. Mostly, the
+    value of R is defined as 20% - 30% of standard deviation of X.
 
     Pick Em[i] as a template, for all j such that 0 < j < N - M + 1, we can
     check whether Em[j] matches with Em[i]. Denote the number of Em[j],
@@ -641,19 +643,19 @@ def samp_entropy(X, M, R):
     SampEn is very close to ApEn.
 
     Suppose given time series is X = [x(1), x(2), ... , x(N)]. We first build
-    embedding matrix Em, of dimension (N-M+1)-by-M, such that the i-th row of Em
-    is x(i),x(i+1), ... , x(i+M-1). Hence, the embedding lag and dimension are
-    1 and M-1 respectively. Such a matrix can be built by calling pyeeg function
-    as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only
+    embedding matrix Em, of dimension (N-M+1)-by-M, such that the i-th row of
+    Em is x(i),x(i+1), ... , x(i+M-1). Hence, the embedding lag and dimension
+    are 1 and M-1 respectively. Such a matrix can be built by calling pyeeg
+    function as Em = embed_seq(X, 1, M). Then we build matrix Emp, whose only
     difference with Em is that the length of each embedding sequence is M + 1
 
     Denote the i-th and j-th row of Em as Em[i] and Em[j]. Their k-th elements
-    are    Em[i][k] and Em[j][k] respectively. The distance between Em[i] and Em[j]
-    is defined as 1) the maximum difference of their corresponding scalar
-    components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two 1-D
-    vectors Em[i] and Em[j] *match* in *tolerance* R, if the distance between them
-    is no greater than R, thus, max(Em[i]-Em[j]) <= R. Mostly, the value of R is
-    defined as 20% - 30% of standard deviation of X.
+    are Em[i][k] and Em[j][k] respectively. The distance between Em[i] and
+    Em[j] is defined as 1) the maximum difference of their corresponding scalar
+    components, thus, max(Em[i]-Em[j]), or 2) Euclidean distance. We say two
+    1-D vectors Em[i] and Em[j] *match* in *tolerance* R, if the distance
+    between them is no greater than R, thus, max(Em[i]-Em[j]) <= R. Mostly, the
+    value of R is defined as 20% - 30% of standard deviation of X.
 
     Pick Em[i] as a template, for all j such that 0 < j < N - M , we can
     check whether Em[j] matches with Em[i]. Denote the number of Em[j],
@@ -708,17 +710,18 @@ def dfa(X, Ave=None, L=None):
     """Compute Detrended Fluctuation Analysis from a time series X and length of
     boxes L.
 
-    The first step to compute DFA is to integrate the signal. Let original seres
-    be X= [x(1), x(2), ..., x(N)].
+    The first step to compute DFA is to integrate the signal. Let original
+    seres be X= [x(1), x(2), ..., x(N)].
 
     The integrated signal Y = [y(1), y(2), ..., y(N)] is obtained as follows
     y(k) = \sum_{i=1}^{k}{x(i)-Ave} where Ave is the mean of X.
 
-    The second step is to partition/slice/segment the integrated sequence Y into
-    boxes. At least two boxes are needed for computing DFA. Box sizes are
+    The second step is to partition/slice/segment the integrated sequence Y
+    into boxes. At least two boxes are needed for computing DFA. Box sizes are
     specified by the L argument of this function. By default, it is from 1/5 of
     signal length to one (x-5)-th of the signal length, where x is the nearest
-    power of 2 from the length of the signal, i.e., 1/16, 1/32, 1/64, 1/128, ...
+    power of 2 from the length of the signal, i.e., 1/16, 1/32, 1/64, 1/128,
+    ...
 
     In each box, a linear least square fitting is employed on data in the box.
     Denote the series on fitted line as Yn. Its k-th elements, yn(k),
@@ -774,7 +777,7 @@ def dfa(X, Ave=None, L=None):
     Reference
     ---------
     Peng C-K, Havlin S, Stanley HE, Goldberger AL. Quantification of scaling
-    exponents and     crossover phenomena in nonstationary heartbeat time series.
+    exponents and crossover phenomena in nonstationary heartbeat time series.
     _Chaos_ 1995;5:82-87
 
     Notes
@@ -788,7 +791,8 @@ def dfa(X, Ave=None, L=None):
     (x-5)-th of the signal length, where x is the nearest power of 2 from the
     length of the signal, i.e., 1/16, 1/32, 1/64, 1/128, ...
 
-    You may generate a list of box sizes and pass in such a list as a parameter.
+    You may generate a list of box sizes and pass in such a list as a
+    parameter.
 
     """
 
@@ -816,9 +820,12 @@ def dfa(X, Ave=None, L=None):
         for j in xrange(0, len(X), n):  # for each box
             if j + n < len(X):
                 c = range(j, j + n)
-                c = numpy.vstack([c, numpy.ones(n)]).T  # coordinates of time in the box
-                y = Y[j:j + n]  # the value of data in the box
-                F[i] += numpy.linalg.lstsq(c, y)[1]  # add residue in this box
+                # coordinates of time in the box
+                c = numpy.vstack([c, numpy.ones(n)]).T
+                # the value of data in the box
+                y = Y[j:j + n]
+                # add residue in this box
+                F[i] += numpy.linalg.lstsq(c, y)[1]
         F[i] /= ((len(X) / n) * n)
     F = numpy.sqrt(F)
 
@@ -883,8 +890,9 @@ def permutation_entropy(x, n, tau):
 
     References
     ----------
-    Bandt, Christoph, and Bernd Pompe. "Permutation entropy: a natural complexity
-    measure for time series." Physical Review Letters 88.17 (2002): 174102.
+    Bandt, Christoph, and Bernd Pompe. "Permutation entropy: a natural
+    complexity measure for time series." Physical Review Letters 88.17
+    (2002): 174102.
 
 
     Examples
@@ -967,24 +975,31 @@ def information_based_similarity(x, y, n):
     Notes
     ----------
     Information based similarity is a measure of dissimilarity between
-    two time series. Let the sequences be x and y. Each sequence is first replaced by
-    its first ordered difference(Encoder). Calculating the Heaviside of the resulting
-    sequences, we get two binary sequences, SymbolicSeq. Using PyEEG function, embed_seq,
-    with lag of 1 and dimension of n, we build an embedding matrix from the latter sequence.
-    Each row of this embedding matrix is called a word. Information based similarity measures
-    the distance between two sequence by comparing the rank of words in the sequences; more
-    explicitly, the distance, D, is calculated using the formula:
-    "1/2^(n-1) * sum( abs(Rank(0)(k)-R(1)(k)) * F(k) )" where Rank(0)(k) and Rank(1)(k)
-    are the rank of the k-th word in each of the input sequences. F(k) is a modified
-    "shannon" weighing function that increases the weight of each word in the calculations
-    when they are more frequent in the sequences.
+    two time series. Let the sequences be x and y. Each sequence is first
+    replaced by its first ordered difference(Encoder). Calculating the
+    Heaviside of the resulting sequences, we get two binary sequences,
+    SymbolicSeq. Using PyEEG function, embed_seq, with lag of 1 and dimension
+    of n, we build an embedding matrix from the latter sequence.
 
-    It is advisable to calculate IBS for numerical sequences using 8-tupple words.
+    Each row of this embedding matrix is called a word. Information based
+    similarity measures the distance between two sequence by comparing the
+    rank of words in the sequences; more explicitly, the distance, D, is
+    calculated using the formula:
+
+    "1/2^(n-1) * sum( abs(Rank(0)(k)-R(1)(k)) * F(k) )" where Rank(0)(k)
+    and Rank(1)(k) are the rank of the k-th word in each of the input
+    sequences. F(k) is a modified "shannon" weighing function that increases
+    the weight of each word in the calculations when they are more frequent in
+    the sequences.
+
+    It is advisable to calculate IBS for numerical sequences using 8-tupple
+    words.
 
     References
     ----------
-    Yang AC, Hseu SS, Yien HW, Goldberger AL, Peng CK: Linguistic analysis of the
-    human heartbeat using frequency and rank order statistics. Phys Rev Lett 2003, 90: 108103
+    Yang AC, Hseu SS, Yien HW, Goldberger AL, Peng CK: Linguistic analysis of
+    the human heartbeat using frequency and rank order statistics. Phys Rev
+    Lett 2003, 90: 108103
 
 
     Examples
@@ -1056,7 +1071,7 @@ def information_based_similarity(x, y, n):
             Prob[i].append(numpy.true_divide(Count[i][k], Sigma))
 
     Entropy = [[], []]
-    for i in range(0,2):
+    for i in range(0, 2):
         for k in range(0, len(Wordlist)):
             if (Prob[i][k] == 0):
                 Entropy[i].append(0)
@@ -1086,6 +1101,6 @@ def information_based_similarity(x, y, n):
             n += 1
 
     IBS = numpy.true_divide(IBS, Z)
-    IBS = numpy.true_divide(IBS,len(Wordlist) - n)
+    IBS = numpy.true_divide(IBS, len(Wordlist) - n)
 
     return IBS
