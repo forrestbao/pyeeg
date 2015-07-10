@@ -793,12 +793,12 @@ def dfa(X, Ave = None, L = None):
             print "time series is too short while the box length is too big"
             print "abort"
             exit()
-        for j in xrange(0,len(X),n): # for each box
+        for j in xrange(0,len(X),n):  # for each box
             if j+n < len(X):
                 c = range(j,j+n)
-                c = numpy.vstack([c, ones(n)]).T # coordinates of time in the box
-                y = Y[j:j+n]                # the value of data in the box
-                F[i] += numpy.linalg.lstsq(c,y)[1]    # add residue in this box
+                c = numpy.vstack([c, numpy.ones(n)]).T  # coordinates of time in the box
+                y = Y[j:j+n]  # the value of data in the box
+                F[i] += numpy.linalg.lstsq(c,y)[1]  # add residue in this box
         F[i] /= ((len(X)/n)*n)
     F = numpy.sqrt(F)
     
