@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pyeeg',
-    version='v0.03',
+    version='0.4.0',
     description='A Python module to extract EEG features.',
     url='https://github.com/forrestbao/pyeeg',
     author='Forrest Bao',
@@ -13,5 +13,3 @@ setup(
     ],
     zip_safe=False
 )
-
-
