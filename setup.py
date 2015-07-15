@@ -1,5 +1,6 @@
 from setuptools import setup
 
+
 setup(
     name='pyeeg',
     version='0.4.0',
