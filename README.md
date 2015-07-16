@@ -21,3 +21,6 @@ $ cd $_
 $ python setup.py install
 ```
 
+### Via pip
+
+pip supports installing from a GitHub repo. Follow the [instructions for cloning](https://pip.pypa.io/en/latest/reference/pip_install.html#git). 
