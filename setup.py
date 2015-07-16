@@ -11,6 +11,5 @@ setup(
     packages=['pyeeg'],
     install_requires=[
         'numpy>=1.9.2',
-    ],
-    zip_safe=False
+    ]
 )
