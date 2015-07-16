@@ -713,7 +713,7 @@ def dfa(X, Ave=None, L=None):
     boxes L.
 
     The first step to compute DFA is to integrate the signal. Let original
-    seres be X= [x(1), x(2), ..., x(N)].
+    series be X= [x(1), x(2), ..., x(N)].
 
     The integrated signal Y = [y(1), y(2), ..., y(N)] is obtained as follows
     y(k) = \sum_{i=1}^{k}{x(i)-Ave} where Ave is the mean of X.
