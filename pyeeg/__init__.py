@@ -4,7 +4,7 @@
    Copyleft 2010 Xin Liu
    Copyleft 2014-2015 Borzou Alipour Fard
 
-PyEEG, a Python module to extract EEG features, v 0.03
+PyEEG, a Python module to extract EEG feature.
 
 Project homepage: http://pyeeg.org
 
