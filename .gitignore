@@ -6,9 +6,11 @@
 # Packages
 *.egg
 *.egg-info
+.Python
 dist
 build
 eggs
+include
 parts
 bin
 var
