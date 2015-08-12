@@ -703,7 +703,7 @@ def samp_entropy(X, M, R):
                 if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
                     Cmp[i] += 1
 
-    Samp_En = numpy.log(sum(Cm) / sum(Cmp))
+    Samp_En = numpy.log(sum(float(Cm)) / sum(float(Cmp)))
 
     return Samp_En
 
