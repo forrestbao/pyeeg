@@ -698,10 +698,10 @@ def samp_entropy(X, M, R):
         for j in xrange(i + 1, N - M):  # no self-match
             # if max(abs(Em[i]-Em[j])) <= R:  # v 0.01_b_r1
             if in_range(Em[i], Em[j], R):
-                Cm[i] += 1.0
-#            if max(abs(Emp[i] - Emp[j])) <= R: # v 0.01_b_r1
+                Cm[i] += 1
+                # if max(abs(Emp[i] - Emp[j])) <= R: # v 0.01_b_r1
                 if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
-                    Cmp[i] += 1.0
+                    Cmp[i] += 1
 
     Samp_En = numpy.log(sum(Cm) / sum(Cmp))
 
