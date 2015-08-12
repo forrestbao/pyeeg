@@ -691,7 +691,7 @@ def samp_entropy(X, M, R):
     Em = embed_seq(X, 1, M)
     Emp = embed_seq(X, 1, M + 1)
 
-    Cm, Cmp = numpy.zeros(N - M - 1) + 1e-100, numpy.zeros(N - M - 1) + 1e-100
+    Cm, Cmp = numpy.zeros(N - M - 1, dtype=float) + 1e-100, numpy.zeros(N - M - 1, dtype=float) + 1e-100
     # in case there is 0 after counting. Log(0) is undefined.
 
     for i in xrange(0, N - M):
@@ -703,7 +703,7 @@ def samp_entropy(X, M, R):
                 if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
                     Cmp[i] += 1
 
-    Samp_En = numpy.log(sum(float(Cm)) / sum(float(Cmp)))
+    Samp_En = numpy.log(sum(Cm) / sum(Cmp))
 
     return Samp_En
 
