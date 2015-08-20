@@ -3,9 +3,10 @@ from setuptools import setup
 
 setup(
     name='pyeeg',
-    version='0.4.0',
+    version='0.4.1',
     description='A Python module to extract EEG features.',
     url='https://github.com/forrestbao/pyeeg',
+    download_url='https://github.com/jbergantine/pyeeg/tarball/0.4.1/',
     author='Forrest Bao',
     author_email='forrest.bao@gmail.com',
     license='GNU',
