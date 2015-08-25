@@ -1107,3 +1107,119 @@ def information_based_similarity(x, y, n):
     IBS = numpy.true_divide(IBS, len(Wordlist) - n)
 
     return IBS
+	
+def LLE(x,tau,n,T,fs):
+    
+    """Calculate largest Lyauponov exponent of a given time series x using
+    Rosenstein algorithm. 
+
+    Parameters
+    ----------
+    
+    x
+        list
+        
+        a time series
+        
+    n
+        integer
+        
+        embedding dimension
+        
+    tau
+        integer
+        
+        Embedding lag
+
+    fs
+        integer
+
+        Sampling frequency
+
+    T
+        integer
+		
+		Mean period
+
+    Returns
+    ----------
+    
+    Lexp
+       float
+
+       Largest Lyapunov Exponent
+        
+    Notes
+    ----------    
+    A n-dimensional trajectory is first reconstructed from the observed data by
+    use of embedding delay of tau, using pyeeg function, embed_seq(x, tau, n). 
+	Algorithm then searches for nearest neighbour of each point on the reconstructed 
+	trajectory; temporal separation of nearest neighbours must be greater than mean 
+	period of the time series: the mean period can be estimated as the reciprocal of 
+	the mean frequency in power spectrum
+    
+	Each pair of nearest neighbours is assumed to diverge exponentially at a rate
+	given by largest Lyapunov exponent. Now having a collection of neighbours, a least
+	square fit to the average exponential divergence is calculated. The slope of this 
+	line gives an accurate estimate of the largest Lyapunov exponent. 
+   
+    References
+    ----------
+	Rosenstein, Michael T., James J. Collins, and Carlo J. De Luca. "A practical method 
+	for calculating largest Lyapunov exponents from small data sets." Physica D: 
+	Nonlinear Phenomena 65.1 (1993): 117-134.
+    
+    
+    Examples
+    ----------
+    >>> import pyeeg
+    >>> X =[3,4,1,2,4,51,4,32,24,12,3,45]
+    >>> pyeeg.LLE(X,2,4,1,1)
+    >>> 0.01219
+
+    """
+
+    
+    t_step = numpy.true_divide(1,fs)
+    EmSpace = embed_seq(x, tau, n)
+    M = len(EmSpace)
+    
+    Pair = []
+    for i in range (0 , M):
+        dij = []
+        for j in range (0, M):
+            if abs(i-j)>T:
+                dij.append((numpy.linalg.norm(EmSpace[i] - EmSpace[j])))
+            elif i-j==0:
+                dij.append(-1)
+            else:
+                dij.append(-2)
+
+        D = tuple(dij)
+        dij.sort()
+        Pair.append( D.index (dij[dij.index(-1)+1]) )
+        
+    
+            
+    
+    Meand_i = []
+    for i in range (0, M):
+        d_ij = 0
+        J_in = 0
+        for j in range(0, M):
+            if max(j+i, Pair[j]+i)< M-1:
+                expd_ij = numpy.linalg.norm(EmSpace[j+i] - EmSpace[Pair[j]+i])
+                J_in = J_in + 1
+                if expd_ij > 0:
+                    d_ij =  d_ij + numpy.log( expd_ij )
+        if J_in > 0:        
+            Meand_i.append(numpy.true_divide(d_ij, J_in))
+        
+            
+    
+    x = range(0, len(Meand_i))
+    A = numpy.vstack([x, numpy.ones(len(x))]).T
+    [m, c] = numpy.linalg.lstsq(A, Meand_i)[0]
+    Lexp = fs * m
+    return(Lexp)
+    
