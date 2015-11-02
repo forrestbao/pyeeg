@@ -87,7 +87,6 @@ def hurst(X):
         R_T[i] = max(X_T[:i + 1]) - min(X_T[:i + 1])
 
     R_S = R_T / S_T
-    print(R_S)
     R_S = numpy.log(R_S)
     n = numpy.log(T)
     A = numpy.vstack([n[1:], numpy.ones(len(n)-1)]).T
