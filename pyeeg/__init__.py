@@ -88,9 +88,12 @@ def hurst(X):
 
     R_S = R_T / S_T
     R_S = numpy.log(R_S)
-    n = numpy.log(T).reshape(N, 1)
-    H = numpy.linalg.lstsq(n[1:], R_S[1:])[0]
-    return H[0]
+    n = numpy.log(T)
+    A = numpy.vstack([n[1:], numpy.ones(len(n)-1)]).T
+    [m, c] = numpy.linalg.lstsq(A, R_S[1:])[0]
+    H = m
+    return H
+
 
 
 def embed_seq(X, Tau, D):
@@ -1221,5 +1224,5 @@ def LLE(x,tau,n,T,fs):
     A = numpy.vstack([x, numpy.ones(len(x))]).T
     [m, c] = numpy.linalg.lstsq(A, Meand_i)[0]
     Lexp = fs * m
-    return(Lexp)
+    return Lexp
     
