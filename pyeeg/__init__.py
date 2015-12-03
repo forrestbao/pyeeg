@@ -31,6 +31,7 @@ Functions listed alphabetically
 --------------------------------------------------
 
 """
+from __future__ import print_function
 import numpy
 
 
@@ -75,13 +76,13 @@ def hurst(X):
 
     N = len(X)
 
-    T = numpy.array([float(i) for i in xrange(1, N + 1)])
+    T = numpy.array([float(i) for i in range(1, N + 1)])
     Y = numpy.cumsum(X)
     Ave_T = Y / T
 
     S_T = numpy.zeros((N))
     R_T = numpy.zeros((N))
-    for i in xrange(N):
+    for i in range(N):
         S_T[i] = numpy.std(X[:i + 1])
         X_T = Y - T * Ave_T[i]
         R_T[i] = max(X_T[:i + 1]) - min(X_T[:i + 1])
@@ -93,7 +94,6 @@ def hurst(X):
     [m, c] = numpy.linalg.lstsq(A, R_S[1:])[0]
     H = m
     return H
-
 
 
 def embed_seq(X, Tau, D):
@@ -161,16 +161,16 @@ def embed_seq(X, Tau, D):
     N = len(X)
 
     if D * Tau > N:
-        print "Cannot build such a matrix, because D * Tau > N"
+        print("Cannot build such a matrix, because D * Tau > N")
         exit()
 
     if Tau < 1:
-        print "Tau has to be at least 1"
+        print("Tau has to be at least 1")
         exit()
 
     Y = numpy.zeros((N - (D - 1) * Tau, D))
-    for i in xrange(0, N - (D - 1) * Tau):
-        for j in xrange(0, D):
+    for i in range(0, N - (D - 1) * Tau):
+        for j in range(0, D):
             Y[i][j] = X[i + j * Tau]
     return Y
 
@@ -211,21 +211,21 @@ def in_range(Template, Scroll, Distance):
     """ Desperate code, but do not delete
     def bit_in_range(Index):
         if abs(Scroll[Index] - Template[Bit]) <=  Distance :
-            print "Bit=", Bit, "Scroll[Index]", Scroll[Index], \
+            print("Bit=", Bit, "Scroll[Index]", Scroll[Index], \
              "Template[Bit]", Template[Bit], \
              "abs(Scroll[Index] - Template[Bit])",\
-             abs(Scroll[Index] - Template[Bit])
+             abs(Scroll[Index] - Template[Bit]))
             return Index + 1 # move
 
     Match_No_Tail = range(0, len(Scroll) - 1) # except the last one
-    #print Match_No_Tail
+    #print(Match_No_Tail)
 
     # first compare Template[:-2] and Scroll[:-2]
 
     # every bit of Template is in range of Scroll
-    for Bit in xrange(0, len(Template) - 1):
+    for Bit in range(0, len(Template) - 1):
         Match_No_Tail = filter(bit_in_range, Match_No_Tail)
-        print Match_No_Tail
+        print(Match_No_Tail)
 
     # second and last, check whether Template[-1] is in range of Scroll and
     #    Scroll[-1] in range of Template
@@ -295,7 +295,7 @@ def bin_power(X, Band, Fs):
     C = numpy.fft.fft(X)
     C = abs(C)
     Power = numpy.zeros(len(Band) - 1)
-    for Freq_Index in xrange(0, len(Band) - 1):
+    for Freq_Index in range(0, len(Band) - 1):
         Freq = float(Band[Freq_Index])
         Next_Freq = float(Band[Freq_Index + 1])
         Power[Freq_Index] = sum(
@@ -324,7 +324,7 @@ def pfd(X, D=None):
         D = numpy.diff(X)
         D = D.tolist()
     N_delta = 0  # number of sign changes in derivative of the signal
-    for i in xrange(1, len(D)):
+    for i in range(1, len(D)):
         if D[i] * D[i - 1] < 0:
             N_delta += 1
     n = len(X)
@@ -340,11 +340,11 @@ def hfd(X, Kmax):
     L = []
     x = []
     N = len(X)
-    for k in xrange(1, Kmax):
+    for k in range(1, Kmax):
         Lk = []
-        for m in xrange(0, k):
+        for m in range(0, k):
             Lmk = 0
-            for i in xrange(1, int(numpy.floor((N - m) / k))):
+            for i in range(1, int(numpy.floor((N - m) / k))):
                 Lmk += abs(X[m + i * k] - X[m + i * k - k])
             Lmk = Lmk * (N - 1) / numpy.floor((N - m) / float(k)) / k
             Lk.append(Lmk)
@@ -404,7 +404,7 @@ def hjorth(X, D=None):
     M2 = float(sum(D ** 2)) / n
     TP = sum(numpy.array(X) ** 2)
     M4 = 0
-    for i in xrange(1, len(D)):
+    for i in range(1, len(D)):
         M4 += (D[i] - D[i - 1]) ** 2
     M4 = M4 / n
 
@@ -466,7 +466,7 @@ def spectral_entropy(X, Band, Fs, Power_Ratio=None):
         Power, Power_Ratio = bin_power(X, Band, Fs)
 
     Spectral_Entropy = 0
-    for i in xrange(0, len(Power_Ratio) - 1):
+    for i in range(0, len(Power_Ratio) - 1):
         Spectral_Entropy += Power_Ratio[i] * numpy.log(Power_Ratio[i])
     Spectral_Entropy /= numpy.log(
         len(Power_Ratio)
@@ -608,9 +608,9 @@ def ap_entropy(X, M, R):
     Cm, Cmp = numpy.zeros(N - M + 1), numpy.zeros(N - M)
     # in case there is 0 after counting. Log(0) is undefined.
 
-    for i in xrange(0, N - M):
-        # print i
-        for j in xrange(i, N - M):  # start from i, self-match counts in ApEn
+    for i in range(0, N - M):
+        # print(i)
+        for j in range(i, N - M):  # start from i, self-match counts in ApEn
             # compare N-M scalars in each subseq v 0.01b_r1
             # if max(abs(Em[i]-Em[j])) <= R:
             if in_range(Em[i], Em[j], R):
@@ -697,8 +697,8 @@ def samp_entropy(X, M, R):
     Cm, Cmp = numpy.zeros(N - M - 1) + 1e-100, numpy.zeros(N - M - 1) + 1e-100
     # in case there is 0 after counting. Log(0) is undefined.
 
-    for i in xrange(0, N - M):
-        for j in xrange(i + 1, N - M):  # no self-match
+    for i in range(0, N - M):
+        for j in range(i + 1, N - M):  # no self-match
             # if max(abs(Em[i]-Em[j])) <= R:  # v 0.01_b_r1
             if in_range(Em[i], Em[j], R):
                 Cm[i] += 1
@@ -776,7 +776,7 @@ def dfa(X, Ave=None, L=None):
     --------
     >>> import pyeeg
     >>> from numpy.random import randn
-    >>> print pyeeg.dfa(randn(4096))
+    >>> print(pyeeg.dfa(randn(4096)))
     0.490035110345
 
     Reference
@@ -811,20 +811,20 @@ def dfa(X, Ave=None, L=None):
 
     if L is None:
         L = numpy.floor(len(X) * 1 / (
-            2 ** numpy.array(range(4, int(numpy.log2(len(X))) - 4)))
+            2 ** numpy.array(list(range(4, int(numpy.log2(len(X))) - 4))))
         )
 
     F = numpy.zeros(len(L))  # F(n) of different given box length n
 
-    for i in xrange(0, len(L)):
+    for i in range(0, len(L)):
         n = int(L[i])                        # for each box length L[i]
         if n == 0:
-            print "time series is too short while the box length is too big"
-            print "abort"
+            print("time series is too short while the box length is too big")
+            print("abort")
             exit()
-        for j in xrange(0, len(X), n):  # for each box
+        for j in range(0, len(X), n):  # for each box
             if j + n < len(X):
-                c = range(j, j + n)
+                c = list(range(j, j + n))
                 # coordinates of time in the box
                 c = numpy.vstack([c, numpy.ones(n)]).T
                 # the value of data in the box
@@ -930,7 +930,7 @@ def permutation_entropy(x, n, tau):
 
     while len(PeSeq) > 0:
         RankMat.append(PeSeq.count(PeSeq[0]))
-        x= PeSeq[0]
+        x = PeSeq[0]
         for j in range(0, PeSeq.count(PeSeq[0])):
             PeSeq.pop(PeSeq.index(x))
 
@@ -1110,28 +1110,28 @@ def information_based_similarity(x, y, n):
     IBS = numpy.true_divide(IBS, len(Wordlist) - n)
 
     return IBS
-	
-def LLE(x,tau,n,T,fs):
-    
+
+
+def LLE(x, tau, n, T, fs):
     """Calculate largest Lyauponov exponent of a given time series x using
-    Rosenstein algorithm. 
+    Rosenstein algorithm.
 
     Parameters
     ----------
-    
+
     x
         list
-        
+
         a time series
-        
+
     n
         integer
-        
+
         embedding dimension
-        
+
     tau
         integer
-        
+
         Embedding lag
 
     fs
@@ -1141,38 +1141,39 @@ def LLE(x,tau,n,T,fs):
 
     T
         integer
-		
-		Mean period
+
+        Mean period
 
     Returns
     ----------
-    
+
     Lexp
        float
 
        Largest Lyapunov Exponent
-        
+
     Notes
-    ----------    
+    ----------
     A n-dimensional trajectory is first reconstructed from the observed data by
-    use of embedding delay of tau, using pyeeg function, embed_seq(x, tau, n). 
-	Algorithm then searches for nearest neighbour of each point on the reconstructed 
-	trajectory; temporal separation of nearest neighbours must be greater than mean 
-	period of the time series: the mean period can be estimated as the reciprocal of 
-	the mean frequency in power spectrum
-    
-	Each pair of nearest neighbours is assumed to diverge exponentially at a rate
-	given by largest Lyapunov exponent. Now having a collection of neighbours, a least
-	square fit to the average exponential divergence is calculated. The slope of this 
-	line gives an accurate estimate of the largest Lyapunov exponent. 
-   
+    use of embedding delay of tau, using pyeeg function, embed_seq(x, tau, n).
+    Algorithm then searches for nearest neighbour of each point on the
+    reconstructed trajectory; temporal separation of nearest neighbours must be
+    greater than mean period of the time series: the mean period can be
+    estimated as the reciprocal of the mean frequency in power spectrum
+
+    Each pair of nearest neighbours is assumed to diverge exponentially at a
+    rate given by largest Lyapunov exponent. Now having a collection of
+    neighbours, a least square fit to the average exponential divergence is
+    calculated. The slope of this line gives an accurate estimate of the
+    largest Lyapunov exponent.
+
     References
     ----------
-	Rosenstein, Michael T., James J. Collins, and Carlo J. De Luca. "A practical method 
-	for calculating largest Lyapunov exponents from small data sets." Physica D: 
-	Nonlinear Phenomena 65.1 (1993): 117-134.
-    
-    
+    Rosenstein, Michael T., James J. Collins, and Carlo J. De Luca. "A
+    practical method for calculating largest Lyapunov exponents from small data
+    sets." Physica D: Nonlinear Phenomena 65.1 (1993): 117-134.
+
+
     Examples
     ----------
     >>> import pyeeg
@@ -1182,47 +1183,39 @@ def LLE(x,tau,n,T,fs):
 
     """
 
-    
-    t_step = numpy.true_divide(1,fs)
     EmSpace = embed_seq(x, tau, n)
     M = len(EmSpace)
-    
+
     Pair = []
-    for i in range (0 , M):
+    for i in range(0, M):
         dij = []
-        for j in range (0, M):
-            if abs(i-j)>T:
+        for j in range(0, M):
+            if abs(i - j) > T:
                 dij.append((numpy.linalg.norm(EmSpace[i] - EmSpace[j])))
-            elif i-j==0:
+            elif i - j == 0:
                 dij.append(-1)
             else:
                 dij.append(-2)
 
         D = tuple(dij)
         dij.sort()
-        Pair.append( D.index (dij[dij.index(-1)+1]) )
-        
-    
-            
-    
+        Pair.append(D.index(dij[dij.index(-1)+1]))
+
     Meand_i = []
-    for i in range (0, M):
+    for i in range(0, M):
         d_ij = 0
         J_in = 0
         for j in range(0, M):
-            if max(j+i, Pair[j]+i)< M-1:
+            if max(j + i, Pair[j] + i) < M - 1:
                 expd_ij = numpy.linalg.norm(EmSpace[j+i] - EmSpace[Pair[j]+i])
                 J_in = J_in + 1
                 if expd_ij > 0:
-                    d_ij =  d_ij + numpy.log( expd_ij )
-        if J_in > 0:        
+                    d_ij = d_ij + numpy.log(expd_ij)
+        if J_in > 0:
             Meand_i.append(numpy.true_divide(d_ij, J_in))
-        
-            
-    
-    x = range(0, len(Meand_i))
+
+    x = list(range(0, len(Meand_i)))
     A = numpy.vstack([x, numpy.ones(len(x))]).T
     [m, c] = numpy.linalg.lstsq(A, Meand_i)[0]
     Lexp = fs * m
     return Lexp
-    
