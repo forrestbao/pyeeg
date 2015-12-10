@@ -158,90 +158,9 @@ def embed_seq(X, Tau, D):
            [ 8.]])
 
     """
-    N = len(X)
-
-    if D * Tau > N:
-        print("Cannot build such a matrix, because D * Tau > N")
-        exit()
-
-    if Tau < 1:
-        print("Tau has to be at least 1")
-        exit()
-
-    Y = numpy.zeros((N - (D - 1) * Tau, D))
-    for i in range(0, N - (D - 1) * Tau):
-        for j in range(0, D):
-            Y[i][j] = X[i + j * Tau]
-    return Y
-
-
-def in_range(Template, Scroll, Distance):
-    """Determines whether one vector is the the range of another vector.
-
-    The two vectors should have equal length.
-
-    Parameters
-    -----------------
-    Template
-        list
-        The template vector, one of two vectors being compared
-
-    Scroll
-        list
-        The scroll vector, one of the two vectors being compared
-
-    Distance
-        float
-        Two vectors match if their distance is less than D
-
-
-    Notes
-    -------
-    The distance between two vectors can be defined as Euclidean distance
-    according to some publications.
-
-    The two vector should of equal length
-
-    """
-
-    for i in range(0, len(Template)):
-            if abs(Template[i] - Scroll[i]) > Distance:
-                return False
-    return True
-    """ Desperate code, but do not delete
-    def bit_in_range(Index):
-        if abs(Scroll[Index] - Template[Bit]) <=  Distance :
-            print("Bit=", Bit, "Scroll[Index]", Scroll[Index], \
-             "Template[Bit]", Template[Bit], \
-             "abs(Scroll[Index] - Template[Bit])",\
-             abs(Scroll[Index] - Template[Bit]))
-            return Index + 1 # move
-
-    Match_No_Tail = range(0, len(Scroll) - 1) # except the last one
-    #print(Match_No_Tail)
-
-    # first compare Template[:-2] and Scroll[:-2]
-
-    # every bit of Template is in range of Scroll
-    for Bit in range(0, len(Template) - 1):
-        Match_No_Tail = filter(bit_in_range, Match_No_Tail)
-        print(Match_No_Tail)
-
-    # second and last, check whether Template[-1] is in range of Scroll and
-    #    Scroll[-1] in range of Template
-
-    # 2.1 Check whether Template[-1] is in the range of Scroll
-    Bit = - 1
-    Match_All =  filter(bit_in_range, Match_No_Tail)
-
-    # 2.2 Check whether Scroll[-1] is in the range of Template
-    # I just write a  loop for this.
-    for i in Match_All:
-        if abs(Scroll[-1] - Template[i] ) <= Distance:
-            Match_All.remove(i)
-
-    return len(Match_All), len(Match_No_Tail)
-    """
+    shape = (X.size - Tau * (D - 1), D)
+    strides = (X.itemsize, Tau * X.itemsize)
+    return numpy.lib.stride_tricks.as_strided(X, shape=shape, strides=strides)
 
 
 def bin_power(X, Band, Fs):
@@ -581,13 +500,10 @@ def ap_entropy(X, M, R):
 
     Notes
     -----
-
-    #. Please be aware that self-match is also counted in ApEn.
-    #. This function now runs very slow. We are still trying to speed it up.
+    Please be aware that self-match is also counted in ApEn.
 
     References
     ----------
-
     Costa M, Goldberger AL, Peng CK, Multiscale entropy analysis of biological
     signals, Physical Review E, 71:021906, 2005
 
@@ -595,47 +511,25 @@ def ap_entropy(X, M, R):
     --------
     samp_entropy: sample entropy of a time series
 
-    Notes
-    -----
-    Extremely slow implementation. Do NOT use if your dataset is not small.
-
     """
     N = len(X)
 
     Em = embed_seq(X, 1, M)
-    Emp = embed_seq(X, 1, M + 1)  # try to only build Emp to save time
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    InRange = numpy.max(D, axis=2) <= R
+    Cm = InRange.mean(axis=0) #  Probability that random M-sequences are in range
 
-    Cm, Cmp = numpy.zeros(N - M + 1), numpy.zeros(N - M)
-    # in case there is 0 after counting. Log(0) is undefined.
+    # M+1-sequences in range iff M-sequences are in range & last values are close
+    Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    Cmp = numpy.logical_and(Dp <= R, InRange[:-1, :-1]).mean(axis=0)
 
-    for i in range(0, N - M):
-        # print(i)
-        for j in range(i, N - M):  # start from i, self-match counts in ApEn
-            # compare N-M scalars in each subseq v 0.01b_r1
-            # if max(abs(Em[i]-Em[j])) <= R:
-            if in_range(Em[i], Em[j], R):
-                Cm[i] += 1  # Xin Liu
-                Cm[j] += 1
-                if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
-                    Cmp[i] += 1
-                    Cmp[j] += 1
-        if in_range(Em[i], Em[N - M], R):
-            Cm[i] += 1
-            Cm[N - M] += 1
-        # try to count Cm[j] and Cmp[j] as well here
+    # Uncomment for old (miscounted) version
+    #Cm += 1 / (N - M +1); Cm[-1] -= 1 / (N - M + 1)
+    #Cmp += 1 / (N - M)
 
-        # index from 0, so N-M+1 is N-M  v 0.01b_r1
-        # if max(abs(Em[N-M]-Em[N-M])) <= R:
-    # for Cm, there is one more iteration than Cmp
-    # if in_range(Em[i], Em[N - M], R):
-    #     Cm[N - M] += 1 # cross-matches on Cm[N - M]
-
-    Cm[N - M] += 1  # Cm[N - M] self-matches
-    # import code;code.interact(local=locals())
-    Cm /= (N - M + 1)
-    Cmp /= (N - M)
-    # import code;code.interact(local=locals())
-    Phi_m, Phi_mp = sum(numpy.log(Cm)), sum(numpy.log(Cmp))
+    Phi_m, Phi_mp = np.sum(numpy.log(Cm)), np.sum(numpy.log(Cmp))
 
     Ap_En = (Phi_m - Phi_mp) / (N - M)
 
@@ -681,32 +575,30 @@ def samp_entropy(X, M, R):
     --------
     ap_entropy: approximate entropy of a time series
 
-
-    Notes
-    -----
-    Extremely slow computation. Do NOT use if your dataset is not small and you
-    are not patient enough.
-
     """
 
     N = len(X)
 
     Em = embed_seq(X, 1, M)
-    Emp = embed_seq(X, 1, M + 1)
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    InRange = numpy.max(D, axis=2) <= R
+    numpy.fill_diagonal(InRange, 0) #  Don't count self-matches
 
-    Cm, Cmp = numpy.zeros(N - M - 1) + 1e-100, numpy.zeros(N - M - 1) + 1e-100
-    # in case there is 0 after counting. Log(0) is undefined.
+    Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
+    Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    Cmp = numpy.logical_and(Dp <= R, InRange[:-1,:-1]).sum(axis=0)
+    # Uncomment below for old (miscounted) version
+    #InRange[numpy.triu_indices(len(InRange))] = 0
+    #InRange = InRange[:-1,:-2]
+    #Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
+    #Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    #Dp = Dp[:,:-1]
+    #Cmp = numpy.logical_and(Dp <= R, InRange).sum(axis=0)
 
-    for i in range(0, N - M):
-        for j in range(i + 1, N - M):  # no self-match
-            # if max(abs(Em[i]-Em[j])) <= R:  # v 0.01_b_r1
-            if in_range(Em[i], Em[j], R):
-                Cm[i] += 1
-#            if max(abs(Emp[i] - Emp[j])) <= R: # v 0.01_b_r1
-                if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
-                    Cmp[i] += 1
-
-    Samp_En = numpy.log(sum(Cm) / sum(Cmp))
+    # Avoid taking log(0)
+    Samp_En = numpy.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
 
     return Samp_En
 
