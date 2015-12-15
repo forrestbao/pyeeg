@@ -31,6 +31,7 @@ Functions listed alphabetically
 --------------------------------------------------
 
 """
+from __future__ import print_function
 import numpy
 
 
@@ -75,22 +76,24 @@ def hurst(X):
 
     N = len(X)
 
-    T = numpy.array([float(i) for i in xrange(1, N + 1)])
+    T = numpy.array([float(i) for i in range(1, N + 1)])
     Y = numpy.cumsum(X)
     Ave_T = Y / T
 
     S_T = numpy.zeros((N))
     R_T = numpy.zeros((N))
-    for i in xrange(N):
+    for i in range(N):
         S_T[i] = numpy.std(X[:i + 1])
         X_T = Y - T * Ave_T[i]
         R_T[i] = max(X_T[:i + 1]) - min(X_T[:i + 1])
 
     R_S = R_T / S_T
     R_S = numpy.log(R_S)
-    n = numpy.log(T).reshape(N, 1)
-    H = numpy.linalg.lstsq(n[1:], R_S[1:])[0]
-    return H[0]
+    n = numpy.log(T)
+    A = numpy.vstack([n[1:], numpy.ones(len(n)-1)]).T
+    [m, c] = numpy.linalg.lstsq(A, R_S[1:])[0]
+    H = m
+    return H
 
 
 def embed_seq(X, Tau, D):
@@ -155,90 +158,9 @@ def embed_seq(X, Tau, D):
            [ 8.]])
 
     """
-    N = len(X)
-
-    if D * Tau > N:
-        print "Cannot build such a matrix, because D * Tau > N"
-        exit()
-
-    if Tau < 1:
-        print "Tau has to be at least 1"
-        exit()
-
-    Y = numpy.zeros((N - (D - 1) * Tau, D))
-    for i in xrange(0, N - (D - 1) * Tau):
-        for j in xrange(0, D):
-            Y[i][j] = X[i + j * Tau]
-    return Y
-
-
-def in_range(Template, Scroll, Distance):
-    """Determines whether one vector is the the range of another vector.
-
-    The two vectors should have equal length.
-
-    Parameters
-    -----------------
-    Template
-        list
-        The template vector, one of two vectors being compared
-
-    Scroll
-        list
-        The scroll vector, one of the two vectors being compared
-
-    Distance
-        float
-        Two vectors match if their distance is less than D
-
-
-    Notes
-    -------
-    The distance between two vectors can be defined as Euclidean distance
-    according to some publications.
-
-    The two vector should of equal length
-
-    """
-
-    for i in range(0, len(Template)):
-            if abs(Template[i] - Scroll[i]) > Distance:
-                return False
-    return True
-    """ Desperate code, but do not delete
-    def bit_in_range(Index):
-        if abs(Scroll[Index] - Template[Bit]) <=  Distance :
-            print "Bit=", Bit, "Scroll[Index]", Scroll[Index], \
-             "Template[Bit]", Template[Bit], \
-             "abs(Scroll[Index] - Template[Bit])",\
-             abs(Scroll[Index] - Template[Bit])
-            return Index + 1 # move
-
-    Match_No_Tail = range(0, len(Scroll) - 1) # except the last one
-    #print Match_No_Tail
-
-    # first compare Template[:-2] and Scroll[:-2]
-
-    # every bit of Template is in range of Scroll
-    for Bit in xrange(0, len(Template) - 1):
-        Match_No_Tail = filter(bit_in_range, Match_No_Tail)
-        print Match_No_Tail
-
-    # second and last, check whether Template[-1] is in range of Scroll and
-    #    Scroll[-1] in range of Template
-
-    # 2.1 Check whether Template[-1] is in the range of Scroll
-    Bit = - 1
-    Match_All =  filter(bit_in_range, Match_No_Tail)
-
-    # 2.2 Check whether Scroll[-1] is in the range of Template
-    # I just write a  loop for this.
-    for i in Match_All:
-        if abs(Scroll[-1] - Template[i] ) <= Distance:
-            Match_All.remove(i)
-
-    return len(Match_All), len(Match_No_Tail)
-    """
+    shape = (X.size - Tau * (D - 1), D)
+    strides = (X.itemsize, Tau * X.itemsize)
+    return numpy.lib.stride_tricks.as_strided(X, shape=shape, strides=strides)
 
 
 def bin_power(X, Band, Fs):
@@ -292,7 +214,7 @@ def bin_power(X, Band, Fs):
     C = numpy.fft.fft(X)
     C = abs(C)
     Power = numpy.zeros(len(Band) - 1)
-    for Freq_Index in xrange(0, len(Band) - 1):
+    for Freq_Index in range(0, len(Band) - 1):
         Freq = float(Band[Freq_Index])
         Next_Freq = float(Band[Freq_Index + 1])
         Power[Freq_Index] = sum(
@@ -321,7 +243,7 @@ def pfd(X, D=None):
         D = numpy.diff(X)
         D = D.tolist()
     N_delta = 0  # number of sign changes in derivative of the signal
-    for i in xrange(1, len(D)):
+    for i in range(1, len(D)):
         if D[i] * D[i - 1] < 0:
             N_delta += 1
     n = len(X)
@@ -337,11 +259,11 @@ def hfd(X, Kmax):
     L = []
     x = []
     N = len(X)
-    for k in xrange(1, Kmax):
+    for k in range(1, Kmax):
         Lk = []
-        for m in xrange(0, k):
+        for m in range(0, k):
             Lmk = 0
-            for i in xrange(1, int(numpy.floor((N - m) / k))):
+            for i in range(1, int(numpy.floor((N - m) / k))):
                 Lmk += abs(X[m + i * k] - X[m + i * k - k])
             Lmk = Lmk * (N - 1) / numpy.floor((N - m) / float(k)) / k
             Lk.append(Lmk)
@@ -401,7 +323,7 @@ def hjorth(X, D=None):
     M2 = float(sum(D ** 2)) / n
     TP = sum(numpy.array(X) ** 2)
     M4 = 0
-    for i in xrange(1, len(D)):
+    for i in range(1, len(D)):
         M4 += (D[i] - D[i - 1]) ** 2
     M4 = M4 / n
 
@@ -463,7 +385,7 @@ def spectral_entropy(X, Band, Fs, Power_Ratio=None):
         Power, Power_Ratio = bin_power(X, Band, Fs)
 
     Spectral_Entropy = 0
-    for i in xrange(0, len(Power_Ratio) - 1):
+    for i in range(0, len(Power_Ratio) - 1):
         Spectral_Entropy += Power_Ratio[i] * numpy.log(Power_Ratio[i])
     Spectral_Entropy /= numpy.log(
         len(Power_Ratio)
@@ -578,13 +500,10 @@ def ap_entropy(X, M, R):
 
     Notes
     -----
-
-    #. Please be aware that self-match is also counted in ApEn.
-    #. This function now runs very slow. We are still trying to speed it up.
+    Please be aware that self-match is also counted in ApEn.
 
     References
     ----------
-
     Costa M, Goldberger AL, Peng CK, Multiscale entropy analysis of biological
     signals, Physical Review E, 71:021906, 2005
 
@@ -592,47 +511,25 @@ def ap_entropy(X, M, R):
     --------
     samp_entropy: sample entropy of a time series
 
-    Notes
-    -----
-    Extremely slow implementation. Do NOT use if your dataset is not small.
-
     """
     N = len(X)
 
     Em = embed_seq(X, 1, M)
-    Emp = embed_seq(X, 1, M + 1)  # try to only build Emp to save time
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    InRange = numpy.max(D, axis=2) <= R
+    Cm = InRange.mean(axis=0) #  Probability that random M-sequences are in range
 
-    Cm, Cmp = numpy.zeros(N - M + 1), numpy.zeros(N - M)
-    # in case there is 0 after counting. Log(0) is undefined.
+    # M+1-sequences in range iff M-sequences are in range & last values are close
+    Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    Cmp = numpy.logical_and(Dp <= R, InRange[:-1, :-1]).mean(axis=0)
 
-    for i in xrange(0, N - M):
-        # print i
-        for j in xrange(i, N - M):  # start from i, self-match counts in ApEn
-            # compare N-M scalars in each subseq v 0.01b_r1
-            # if max(abs(Em[i]-Em[j])) <= R:
-            if in_range(Em[i], Em[j], R):
-                Cm[i] += 1  # Xin Liu
-                Cm[j] += 1
-                if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
-                    Cmp[i] += 1
-                    Cmp[j] += 1
-        if in_range(Em[i], Em[N - M], R):
-            Cm[i] += 1
-            Cm[N - M] += 1
-        # try to count Cm[j] and Cmp[j] as well here
+    # Uncomment for old (miscounted) version
+    #Cm += 1 / (N - M +1); Cm[-1] -= 1 / (N - M + 1)
+    #Cmp += 1 / (N - M)
 
-        # index from 0, so N-M+1 is N-M  v 0.01b_r1
-        # if max(abs(Em[N-M]-Em[N-M])) <= R:
-    # for Cm, there is one more iteration than Cmp
-    # if in_range(Em[i], Em[N - M], R):
-    #     Cm[N - M] += 1 # cross-matches on Cm[N - M]
-
-    Cm[N - M] += 1  # Cm[N - M] self-matches
-    # import code;code.interact(local=locals())
-    Cm /= (N - M + 1)
-    Cmp /= (N - M)
-    # import code;code.interact(local=locals())
-    Phi_m, Phi_mp = sum(numpy.log(Cm)), sum(numpy.log(Cmp))
+    Phi_m, Phi_mp = np.sum(numpy.log(Cm)), np.sum(numpy.log(Cmp))
 
     Ap_En = (Phi_m - Phi_mp) / (N - M)
 
@@ -678,32 +575,30 @@ def samp_entropy(X, M, R):
     --------
     ap_entropy: approximate entropy of a time series
 
-
-    Notes
-    -----
-    Extremely slow computation. Do NOT use if your dataset is not small and you
-    are not patient enough.
-
     """
 
     N = len(X)
 
     Em = embed_seq(X, 1, M)
-    Emp = embed_seq(X, 1, M + 1)
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    InRange = numpy.max(D, axis=2) <= R
+    numpy.fill_diagonal(InRange, 0) #  Don't count self-matches
 
-    Cm, Cmp = numpy.zeros(N - M - 1) + 1e-100, numpy.zeros(N - M - 1) + 1e-100
-    # in case there is 0 after counting. Log(0) is undefined.
+    Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
+    Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    Cmp = numpy.logical_and(Dp <= R, InRange[:-1,:-1]).sum(axis=0)
+    # Uncomment below for old (miscounted) version
+    #InRange[numpy.triu_indices(len(InRange))] = 0
+    #InRange = InRange[:-1,:-2]
+    #Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
+    #Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
+    #Dp = Dp[:,:-1]
+    #Cmp = numpy.logical_and(Dp <= R, InRange).sum(axis=0)
 
-    for i in xrange(0, N - M):
-        for j in xrange(i + 1, N - M):  # no self-match
-            # if max(abs(Em[i]-Em[j])) <= R:  # v 0.01_b_r1
-            if in_range(Em[i], Em[j], R):
-                Cm[i] += 1
-                # if max(abs(Emp[i] - Emp[j])) <= R: # v 0.01_b_r1
-                if abs(Emp[i][-1] - Emp[j][-1]) <= R:  # check last one
-                    Cmp[i] += 1
-
-    Samp_En = numpy.log(sum(Cm) / sum(Cmp))
+    # Avoid taking log(0)
+    Samp_En = numpy.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
 
     return Samp_En
 
@@ -773,7 +668,7 @@ def dfa(X, Ave=None, L=None):
     --------
     >>> import pyeeg
     >>> from numpy.random import randn
-    >>> print pyeeg.dfa(randn(4096))
+    >>> print(pyeeg.dfa(randn(4096)))
     0.490035110345
 
     Reference
@@ -808,20 +703,20 @@ def dfa(X, Ave=None, L=None):
 
     if L is None:
         L = numpy.floor(len(X) * 1 / (
-            2 ** numpy.array(range(4, int(numpy.log2(len(X))) - 4)))
+            2 ** numpy.array(list(range(4, int(numpy.log2(len(X))) - 4))))
         )
 
     F = numpy.zeros(len(L))  # F(n) of different given box length n
 
-    for i in xrange(0, len(L)):
+    for i in range(0, len(L)):
         n = int(L[i])                        # for each box length L[i]
         if n == 0:
-            print "time series is too short while the box length is too big"
-            print "abort"
+            print("time series is too short while the box length is too big")
+            print("abort")
             exit()
-        for j in xrange(0, len(X), n):  # for each box
+        for j in range(0, len(X), n):  # for each box
             if j + n < len(X):
-                c = range(j, j + n)
+                c = list(range(j, j + n))
                 # coordinates of time in the box
                 c = numpy.vstack([c, numpy.ones(n)]).T
                 # the value of data in the box
@@ -927,7 +822,7 @@ def permutation_entropy(x, n, tau):
 
     while len(PeSeq) > 0:
         RankMat.append(PeSeq.count(PeSeq[0]))
-        x= PeSeq[0]
+        x = PeSeq[0]
         for j in range(0, PeSeq.count(PeSeq[0])):
             PeSeq.pop(PeSeq.index(x))
 
@@ -1107,3 +1002,111 @@ def information_based_similarity(x, y, n):
     IBS = numpy.true_divide(IBS, len(Wordlist) - n)
 
     return IBS
+
+
+def LLE(x, tau, n, T, fs):
+    """Calculate largest Lyauponov exponent of a given time series x using
+    Rosenstein algorithm.
+
+    Parameters
+    ----------
+
+    x
+        list
+
+        a time series
+
+    n
+        integer
+
+        embedding dimension
+
+    tau
+        integer
+
+        Embedding lag
+
+    fs
+        integer
+
+        Sampling frequency
+
+    T
+        integer
+
+        Mean period
+
+    Returns
+    ----------
+
+    Lexp
+       float
+
+       Largest Lyapunov Exponent
+
+    Notes
+    ----------
+    A n-dimensional trajectory is first reconstructed from the observed data by
+    use of embedding delay of tau, using pyeeg function, embed_seq(x, tau, n).
+    Algorithm then searches for nearest neighbour of each point on the
+    reconstructed trajectory; temporal separation of nearest neighbours must be
+    greater than mean period of the time series: the mean period can be
+    estimated as the reciprocal of the mean frequency in power spectrum
+
+    Each pair of nearest neighbours is assumed to diverge exponentially at a
+    rate given by largest Lyapunov exponent. Now having a collection of
+    neighbours, a least square fit to the average exponential divergence is
+    calculated. The slope of this line gives an accurate estimate of the
+    largest Lyapunov exponent.
+
+    References
+    ----------
+    Rosenstein, Michael T., James J. Collins, and Carlo J. De Luca. "A
+    practical method for calculating largest Lyapunov exponents from small data
+    sets." Physica D: Nonlinear Phenomena 65.1 (1993): 117-134.
+
+
+    Examples
+    ----------
+    >>> import pyeeg
+    >>> X = np.array([3,4,1,2,4,51,4,32,24,12,3,45])
+    >>> pyeeg.LLE(X,2,4,1,1)
+    >>> 0.18771136179353307
+
+    """
+
+    Em = embed_seq(x, tau, n)
+    M = len(Em)
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    square_dists = (A - B) ** 2 #  square_dists[i,j,k] = (Em[i][k]-Em[j][k])^2
+    D = numpy.sqrt(square_dists[:,:,:].sum(axis=2)) #  D[i,j] = ||Em[i]-Em[j]||_2
+
+    # Exclude elements within T of the diagonal
+    band = numpy.tri(D.shape[0], k=T) - numpy.tri(D.shape[0], k=-T-1)
+    band[band == 1] = numpy.inf
+    neighbors = (D + band).argmin(axis=0) #  nearest neighbors more than T steps away
+
+    # in_bounds[i,j] = (i+j <= M-1 and i+neighbors[j] <= M-1)
+    inc = numpy.tile(numpy.arange(M), (M, 1))
+    row_inds = (numpy.tile(numpy.arange(M), (M, 1)).T + inc)
+    col_inds = (numpy.tile(neighbors, (M, 1)) + inc.T)
+    in_bounds = numpy.logical_and(row_inds <= M - 1, col_inds <= M - 1)
+    # Uncomment for old (miscounted) version
+    #in_bounds = numpy.logical_and(row_inds < M - 1, col_inds < M - 1)
+    row_inds[-in_bounds] = 0
+    col_inds[-in_bounds] = 0
+
+    # neighbor_dists[i,j] = ||Em[i+j]-Em[i+neighbors[j]]||_2
+    neighbor_dists = numpy.ma.MaskedArray(D[row_inds, col_inds], -in_bounds)
+    J = (-neighbor_dists.mask).sum(axis=1) #  number of in-bounds indices by row
+    # Set invalid (zero) values to 1; log(1) = 0 so sum is unchanged
+    neighbor_dists[neighbor_dists == 0] = 1
+    d_ij = numpy.sum(numpy.log(neighbor_dists.data), axis=1)
+    mean_d = d_ij[J > 0] / J[J > 0]
+
+    x = numpy.arange(len(mean_d))
+    X = numpy.vstack((x, numpy.ones(len(mean_d)))).T
+    [m, c] = numpy.linalg.lstsq(X, mean_d)[0]
+    Lexp = fs * m
+    return Lexp
