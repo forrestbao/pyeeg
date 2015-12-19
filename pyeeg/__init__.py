@@ -1069,45 +1069,44 @@ def LLE(x, tau, n, T, fs):
     Examples
     ----------
     >>> import pyeeg
-    >>> X =[3,4,1,2,4,51,4,32,24,12,3,45]
+    >>> X = np.array([3,4,1,2,4,51,4,32,24,12,3,45])
     >>> pyeeg.LLE(X,2,4,1,1)
-    >>> 0.01219
+    >>> 0.18771136179353307
 
     """
 
-    EmSpace = embed_seq(x, tau, n)
-    M = len(EmSpace)
+    Em = embed_seq(x, tau, n)
+    M = len(Em)
+    A = numpy.tile(Em, (len(Em), 1, 1))
+    B = numpy.transpose(A, [1, 0, 2])
+    square_dists = (A - B) ** 2 #  square_dists[i,j,k] = (Em[i][k]-Em[j][k])^2
+    D = numpy.sqrt(square_dists[:,:,:].sum(axis=2)) #  D[i,j] = ||Em[i]-Em[j]||_2
 
-    Pair = []
-    for i in range(0, M):
-        dij = []
-        for j in range(0, M):
-            if abs(i - j) > T:
-                dij.append((numpy.linalg.norm(EmSpace[i] - EmSpace[j])))
-            elif i - j == 0:
-                dij.append(-1)
-            else:
-                dij.append(-2)
+    # Exclude elements within T of the diagonal
+    band = numpy.tri(D.shape[0], k=T) - numpy.tri(D.shape[0], k=-T-1)
+    band[band == 1] = numpy.inf
+    neighbors = (D + band).argmin(axis=0) #  nearest neighbors more than T steps away
 
-        D = tuple(dij)
-        dij.sort()
-        Pair.append(D.index(dij[dij.index(-1)+1]))
+    # in_bounds[i,j] = (i+j <= M-1 and i+neighbors[j] <= M-1)
+    inc = numpy.tile(numpy.arange(M), (M, 1))
+    row_inds = (numpy.tile(numpy.arange(M), (M, 1)).T + inc)
+    col_inds = (numpy.tile(neighbors, (M, 1)) + inc.T)
+    in_bounds = numpy.logical_and(row_inds <= M - 1, col_inds <= M - 1)
+    # Uncomment for old (miscounted) version
+    #in_bounds = numpy.logical_and(row_inds < M - 1, col_inds < M - 1)
+    row_inds[-in_bounds] = 0
+    col_inds[-in_bounds] = 0
 
-    Meand_i = []
-    for i in range(0, M):
-        d_ij = 0
-        J_in = 0
-        for j in range(0, M):
-            if max(j + i, Pair[j] + i) < M - 1:
-                expd_ij = numpy.linalg.norm(EmSpace[j+i] - EmSpace[Pair[j]+i])
-                J_in = J_in + 1
-                if expd_ij > 0:
-                    d_ij = d_ij + numpy.log(expd_ij)
-        if J_in > 0:
-            Meand_i.append(numpy.true_divide(d_ij, J_in))
+    # neighbor_dists[i,j] = ||Em[i+j]-Em[i+neighbors[j]]||_2
+    neighbor_dists = numpy.ma.MaskedArray(D[row_inds, col_inds], -in_bounds)
+    J = (-neighbor_dists.mask).sum(axis=1) #  number of in-bounds indices by row
+    # Set invalid (zero) values to 1; log(1) = 0 so sum is unchanged
+    neighbor_dists[neighbor_dists == 0] = 1
+    d_ij = numpy.sum(numpy.log(neighbor_dists.data), axis=1)
+    mean_d = d_ij[J > 0] / J[J > 0]
 
-    x = list(range(0, len(Meand_i)))
-    A = numpy.vstack([x, numpy.ones(len(x))]).T
-    [m, c] = numpy.linalg.lstsq(A, Meand_i)[0]
+    x = numpy.arange(len(mean_d))
+    X = numpy.vstack((x, numpy.ones(len(mean_d)))).T
+    [m, c] = numpy.linalg.lstsq(X, mean_d)[0]
     Lexp = fs * m
     return Lexp
