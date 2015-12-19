@@ -73,25 +73,25 @@ def hurst(X):
     0.5057444
 
     """
-
-    N = len(X)
-
-    T = numpy.array([float(i) for i in range(1, N + 1)])
+    X = numpy.array(X)
+    N = X.size
+    T = numpy.arange(1, N + 1)
     Y = numpy.cumsum(X)
     Ave_T = Y / T
 
-    S_T = numpy.zeros((N))
-    R_T = numpy.zeros((N))
+    S_T = numpy.zeros(N)
+    R_T = numpy.zeros(N)
+
     for i in range(N):
         S_T[i] = numpy.std(X[:i + 1])
         X_T = Y - T * Ave_T[i]
-        R_T[i] = max(X_T[:i + 1]) - min(X_T[:i + 1])
+        R_T[i] = numpy.ptp(X_T[:i + 1])
 
     R_S = R_T / S_T
-    R_S = numpy.log(R_S)
-    n = numpy.log(T)
-    A = numpy.vstack([n[1:], numpy.ones(len(n)-1)]).T
-    [m, c] = numpy.linalg.lstsq(A, R_S[1:])[0]
+    R_S = numpy.log(R_S)[1:]
+    n = numpy.log(T)[1:]
+    A = numpy.column_stack((n, numpy.ones(n.size)))
+    [m, c] = numpy.linalg.lstsq(A, R_S)[0]
     H = m
     return H
 
