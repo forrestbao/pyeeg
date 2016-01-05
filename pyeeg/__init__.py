@@ -529,7 +529,7 @@ def ap_entropy(X, M, R):
     #Cm += 1 / (N - M +1); Cm[-1] -= 1 / (N - M + 1)
     #Cmp += 1 / (N - M)
 
-    Phi_m, Phi_mp = np.sum(numpy.log(Cm)), np.sum(numpy.log(Cmp))
+    Phi_m, Phi_mp = numpy.sum(numpy.log(Cm)), numpy.sum(numpy.log(Cmp))
 
     Ap_En = (Phi_m - Phi_mp) / (N - M)
 
@@ -598,7 +598,7 @@ def samp_entropy(X, M, R):
     #Cmp = numpy.logical_and(Dp <= R, InRange).sum(axis=0)
 
     # Avoid taking log(0)
-    Samp_En = numpy.log(np.sum(Cm + 1e-100) / np.sum(Cmp + 1e-100))
+    Samp_En = numpy.log(numpy.sum(Cm + 1e-100) / numpy.sum(Cmp + 1e-100))
 
     return Samp_En
 
@@ -1069,7 +1069,7 @@ def LLE(x, tau, n, T, fs):
     Examples
     ----------
     >>> import pyeeg
-    >>> X = np.array([3,4,1,2,4,51,4,32,24,12,3,45])
+    >>> X = numpy.array([3,4,1,2,4,51,4,32,24,12,3,45])
     >>> pyeeg.LLE(X,2,4,1,1)
     >>> 0.18771136179353307
 
