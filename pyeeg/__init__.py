@@ -765,7 +765,7 @@ def permutation_entropy(x, n, tau):
 
     Notes
     ----------
-    Suppose the given time series is X =[x(1),x(2),x(3),x(N)].
+    Suppose the given time series is X =[x(1),x(2),x(3),...,x(N)].
     We first build embedding matrix Em, of dimension(n*N-n+1),
     such that the ith row of Em is x(i),x(i+1),..x(i+n-1). Hence
     the embedding lag and the embedding dimension are 1 and n
@@ -781,7 +781,7 @@ def permutation_entropy(x, n, tau):
     To calculate the Permutation entropy, we calculate the entropy of PeSeq.
     In doing so, we count the number of occurrences of each permutation
     in PeSeq and write it in a sequence, RankMat. We then use this sequence to
-    calculate entropy by using Shanons entropy formula.
+    calculate entropy by using Shannon's entropy formula.
 
     Permutation entropy is usually calculated with n in range of 3 and 7.
 
