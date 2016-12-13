@@ -6,13 +6,22 @@ from pyeeg import samp_entropy
 
 
 class SampEnTests(unittest.TestCase):
-    def setUp(self):
-        dir = os.path.dirname(__file__)
-        self.file_path = os.path.join(dir, './demo_data/sampentest.txt')
+    def test_sampen_against_predictable_sequence(self):
+        data = numpy.asarray([10, 20] * 2000)
+        self.assertAlmostEqual(
+            samp_entropy(data, 2, 0.2),
+            0.0,
+            places=2
+        )
 
-    def test_sampen(self):
+    def test_sampen_against_original_c_test_data(self):
+        """Use test data from
+        http://www.physionet.org/physiotools/sampen/c/sampentest.txt
+        """
+        dir = os.path.dirname(__file__)
+        file_path = os.path.join(dir, './demo_data/sampentest.txt')
         data = []
-        with open(self.file_path, 'r') as file:
+        with open(file_path, 'r') as file:
             for row in file:
                 data.append(float(row.strip()))
 
