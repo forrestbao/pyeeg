@@ -77,27 +77,37 @@ def LLE(x, tau, n, T, fs):
     M = len(Em)
     A = numpy.tile(Em, (len(Em), 1, 1))
     B = numpy.transpose(A, [1, 0, 2])
-    square_dists = (A - B) ** 2 #  square_dists[i,j,k] = (Em[i][k]-Em[j][k])^2
-    D = numpy.sqrt(square_dists[:,:,:].sum(axis=2)) #  D[i,j] = ||Em[i]-Em[j]||_2
+
+    #  square_dists[i,j,k] = (Em[i][k]-Em[j][k])^2
+    square_dists = (A - B) ** 2
+
+    #  D[i,j] = ||Em[i]-Em[j]||_2
+    D = numpy.sqrt(square_dists[:, :, :].sum(axis=2))
 
     # Exclude elements within T of the diagonal
-    band = numpy.tri(D.shape[0], k=T) - numpy.tri(D.shape[0], k=-T-1)
+    band = numpy.tri(D.shape[0], k=T) - numpy.tri(D.shape[0], k=-T - 1)
     band[band == 1] = numpy.inf
-    neighbors = (D + band).argmin(axis=0) #  nearest neighbors more than T steps away
+
+    # nearest neighbors more than T steps away
+    neighbors = (D + band).argmin(axis=0)
 
     # in_bounds[i,j] = (i+j <= M-1 and i+neighbors[j] <= M-1)
     inc = numpy.tile(numpy.arange(M), (M, 1))
     row_inds = (numpy.tile(numpy.arange(M), (M, 1)).T + inc)
     col_inds = (numpy.tile(neighbors, (M, 1)) + inc.T)
     in_bounds = numpy.logical_and(row_inds <= M - 1, col_inds <= M - 1)
+
     # Uncomment for old (miscounted) version
-    #in_bounds = numpy.logical_and(row_inds < M - 1, col_inds < M - 1)
+    # in_bounds = numpy.logical_and(row_inds < M - 1, col_inds < M - 1)
     row_inds[-in_bounds] = 0
     col_inds[-in_bounds] = 0
 
     # neighbor_dists[i,j] = ||Em[i+j]-Em[i+neighbors[j]]||_2
     neighbor_dists = numpy.ma.MaskedArray(D[row_inds, col_inds], -in_bounds)
-    J = (-neighbor_dists.mask).sum(axis=1) #  number of in-bounds indices by row
+
+    #  number of in-bounds indices by row
+    J = (-neighbor_dists.mask).sum(axis=1)
+
     # Set invalid (zero) values to 1; log(1) = 0 so sum is unchanged
     neighbor_dists[neighbor_dists == 0] = 1
     d_ij = numpy.sum(numpy.log(neighbor_dists.data), axis=1)

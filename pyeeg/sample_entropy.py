@@ -48,20 +48,16 @@ def samp_entropy(X, M, R):
     Em = embed_seq(X, 1, M)
     A = numpy.tile(Em, (len(Em), 1, 1))
     B = numpy.transpose(A, [1, 0, 2])
-    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    D = numpy.abs(A - B)  # D[i,j,k] = |Em[i][k] - Em[j][k]|
     InRange = numpy.max(D, axis=2) <= R
-    numpy.fill_diagonal(InRange, 0) #  Don't count self-matches
+    numpy.fill_diagonal(InRange, 0)  # Don't count self-matches
 
-    Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
-    Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
-    Cmp = numpy.logical_and(Dp <= R, InRange[:-1,:-1]).sum(axis=0)
-    # Uncomment below for old (miscounted) version
-    #InRange[numpy.triu_indices(len(InRange))] = 0
-    #InRange = InRange[:-1,:-2]
-    #Cm = InRange.sum(axis=0) #  Probability that random M-sequences are in range
-    #Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
-    #Dp = Dp[:,:-1]
-    #Cmp = numpy.logical_and(Dp <= R, InRange).sum(axis=0)
+    Cm = InRange.sum(axis=0)  # Probability that random M-sequences are in range
+    Dp = numpy.abs(
+        numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T
+    )
+
+    Cmp = numpy.logical_and(Dp <= R, InRange[:-1, :-1]).sum(axis=0)
 
     # Avoid taking log(0)
     Samp_En = numpy.log(numpy.sum(Cm + 1e-100) / numpy.sum(Cmp + 1e-100))

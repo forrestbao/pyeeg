@@ -1,5 +1,5 @@
 import numpy
-from .embedded_sequence import embed_seq
+from pyeeg import embed_seq
 
 
 def svd_entropy(X, Tau, DE, W=None):

@@ -1,5 +1,7 @@
 import numpy
 
+from pyeeg import bin_power
+
 
 def spectral_entropy(X, Band, Fs, Power_Ratio=None):
     """Compute spectral entropy of a time series from either two cases below:
