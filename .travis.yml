@@ -1,7 +1,12 @@
 language: python
-python: 3.5
+python:
+  - "3.5"
+  - "2.7"
 # command to install dependencies
 install:
   - pip install numpy>=1.9.2
+# command to run tests
+script:
+  - python setup.py test
 # containers
 sudo: false
