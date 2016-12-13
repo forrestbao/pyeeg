@@ -56,17 +56,13 @@ def ap_entropy(X, M, R):
     Em = embed_seq(X, 1, M)
     A = numpy.tile(Em, (len(Em), 1, 1))
     B = numpy.transpose(A, [1, 0, 2])
-    D = numpy.abs(A - B) #  D[i,j,k] = |Em[i][k] - Em[j][k]|
+    D = numpy.abs(A - B)  # D[i,j,k] = |Em[i][k] - Em[j][k]|
     InRange = numpy.max(D, axis=2) <= R
-    Cm = InRange.mean(axis=0) #  Probability that random M-sequences are in range
+    Cm = InRange.mean(axis=0)  # Probability that random M-sequences are in range
 
-    # M+1-sequences in range iff M-sequences are in range & last values are close
+    # M+1-sequences in range if M-sequences are in range & last values are close
     Dp = numpy.abs(numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T)
     Cmp = numpy.logical_and(Dp <= R, InRange[:-1, :-1]).mean(axis=0)
-
-    # Uncomment for old (miscounted) version
-    #Cm += 1 / (N - M +1); Cm[-1] -= 1 / (N - M + 1)
-    #Cmp += 1 / (N - M)
 
     Phi_m, Phi_mp = numpy.sum(numpy.log(Cm)), numpy.sum(numpy.log(Cmp))
 
