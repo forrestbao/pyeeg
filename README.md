@@ -43,7 +43,7 @@ $ python setup.py test
 
 ### Lint for PEP8 compliance
 
-Install `pylint` and then lint the project
+Install `pylint` as necessary and then lint the project.
 
 ```sh
 $ pip install pylint
