@@ -1,12 +1,15 @@
 language: python
 python:
   - "3.5"
-  - "2.7"
+  - "2.7_with_system_site_packages"
 # command to install dependencies
+before_install:
+  - sudo apt-get update -qq
+  - if [[ $TRAVIS_PYTHON_VERSION == "2.7_with_system_site_packages" ]]; then sudo apt-get install -qq python-numpy; fi
 install:
   - pip install numpy>=1.9.2
 # command to run tests
 script:
   - python setup.py test
 # containers
-sudo: false
+sudo: required
