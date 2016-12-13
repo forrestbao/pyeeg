@@ -1,5 +1,5 @@
 import numpy
-from embedded_sequence import embed_seq
+from .embedded_sequence import embed_seq
 
 
 def ap_entropy(X, M, R):

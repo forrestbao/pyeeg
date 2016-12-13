@@ -12,5 +12,5 @@ setup(
     install_requires=[
         'numpy>=1.9.2',
     ],
-    test_suite='runtests.runtests',
+    test_suite='tests',
 )

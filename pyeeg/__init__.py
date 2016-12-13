@@ -32,18 +32,18 @@ Functions listed alphabetically
 
 """
 
-from approximate_entropy import ap_entropy
-from bin_power import bin_power
-from detrended_fluctuation_analysis import dfa
-from embedded_sequence import embed_seq
-from fisher_info import fisher_info
-from hjorth_fractal_dimension import hfd
-from hjorth_mobility_complexity import hjorth
-from hurst import hurst
-from information_based_similarity import information_based_similarity
-from largest_lyauponov_exponent import LLE
-from permutation_entropy import permutation_entropy
-from petrosian_fractal_dimension import pfd
-from sample_entropy import samp_entropy
-from spectral_entropy import spectral_entropy
-from svd_entropy import svd_entropy
+from .approximate_entropy import ap_entropy
+from .bin_power import bin_power
+from .detrended_fluctuation_analysis import dfa
+from .embedded_sequence import embed_seq
+from .fisher_info import fisher_info
+from .hjorth_fractal_dimension import hfd
+from .hjorth_mobility_complexity import hjorth
+from .hurst import hurst
+from .information_based_similarity import information_based_similarity
+from .largest_lyauponov_exponent import LLE
+from .permutation_entropy import permutation_entropy
+from .petrosian_fractal_dimension import pfd
+from .sample_entropy import samp_entropy
+from .spectral_entropy import spectral_entropy
+from .svd_entropy import svd_entropy
