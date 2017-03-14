@@ -41,6 +41,16 @@ Run the test suite contained in `tests/`.
 $ python setup.py test
 ```
 
+With TOX
+--------
+
+Install `tox` and various Python versions as necessary and then run.
+
+```sh
+$ pip install tox
+$ tox
+```
+
 ### Lint for PEP8 compliance
 
 Install `pylint` as necessary and then lint the project.
