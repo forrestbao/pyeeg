@@ -253,12 +253,11 @@ def pfd(X, D=None):
 
 
 def hfd(X, Kmax):
-    """ Compute Hjorth Fractal Dimension of a time series X, kmax
+    """ Compute Higuchi Fractal Dimension of a time series X.  Kmax
      is an HFD parameter
     """
-    L = []
-    x = []
-    N = len(X)
+    L, x, N = [], [], len(X)
+
     for k in range(1, Kmax):
         Lk = []
         for m in range(0, k):
@@ -270,7 +269,7 @@ def hfd(X, Kmax):
         L.append(numpy.log(numpy.mean(Lk)))
         x.append([numpy.log(float(1) / k), 1])
 
-    (p, r1, r2, s) = numpy.linalg.lstsq(x, L)
+    (p, _, _, _) = numpy.linalg.lstsq(x, L)
     return p[0]
 
 
