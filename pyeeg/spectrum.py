@@ -56,9 +56,8 @@ def bin_power(X, Band, Fs):
         Freq = float(Band[Freq_Index])
         Next_Freq = float(Band[Freq_Index + 1])
         Power[Freq_Index] = sum(
-            C[numpy.floor(
-                Freq / Fs * len(X)
-            ): numpy.floor(Next_Freq / Fs * len(X))]
+            C[int(numpy.floor(Freq / Fs * len(X))): 
+                int(numpy.floor(Next_Freq / Fs * len(X)))]
         )
     Power_Ratio = Power / sum(Power)
     return Power, Power_Ratio
