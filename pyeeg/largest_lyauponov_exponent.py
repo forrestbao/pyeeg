@@ -1,5 +1,4 @@
 import numpy
-from .embedded_sequence import embed_seq
 
 
 def LLE(x, tau, n, T, fs):
@@ -69,9 +68,11 @@ def LLE(x, tau, n, T, fs):
     >>> import pyeeg
     >>> X = numpy.array([3,4,1,2,4,51,4,32,24,12,3,45])
     >>> pyeeg.LLE(X,2,4,1,1)
-    >>> 0.18771136179353307
+       0.18771136179353307
 
     """
+
+    from embedded_sequence import embed_seq
 
     Em = embed_seq(x, tau, n)
     M = len(Em)
@@ -99,14 +100,14 @@ def LLE(x, tau, n, T, fs):
 
     # Uncomment for old (miscounted) version
     # in_bounds = numpy.logical_and(row_inds < M - 1, col_inds < M - 1)
-    row_inds[-in_bounds] = 0
-    col_inds[-in_bounds] = 0
+    row_inds[~in_bounds] = 0
+    col_inds[~in_bounds] = 0
 
     # neighbor_dists[i,j] = ||Em[i+j]-Em[i+neighbors[j]]||_2
-    neighbor_dists = numpy.ma.MaskedArray(D[row_inds, col_inds], -in_bounds)
+    neighbor_dists = numpy.ma.MaskedArray(D[row_inds, col_inds], ~in_bounds)
 
     #  number of in-bounds indices by row
-    J = (-neighbor_dists.mask).sum(axis=1)
+    J = (~neighbor_dists.mask).sum(axis=1)
 
     # Set invalid (zero) values to 1; log(1) = 0 so sum is unchanged
     neighbor_dists[neighbor_dists == 0] = 1
@@ -118,3 +119,8 @@ def LLE(x, tau, n, T, fs):
     [m, c] = numpy.linalg.lstsq(X, mean_d)[0]
     Lexp = fs * m
     return Lexp
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()

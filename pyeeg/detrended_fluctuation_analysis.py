@@ -67,9 +67,9 @@ def dfa(X, Ave=None, L=None):
     Examples
     --------
     >>> import pyeeg
-    >>> from numpy.random import randn
-    >>> print(pyeeg.dfa(randn(4096)))
-    0.490035110345
+    >>> numpy.random.seed(2018)
+    >>> print(pyeeg.dfa(numpy.random.randn(4096))) 
+    0.5121794335479618
 
     Reference
     ---------
@@ -131,3 +131,9 @@ def dfa(X, Ave=None, L=None):
     ).T, numpy.log(F))[0][0]
 
     return Alpha
+
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(verbose=True) 

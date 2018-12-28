@@ -43,28 +43,28 @@ def embed_seq(time_series, tau, embedding_dimension):
     >>> import pyeeg
     >>> a=range(0,9)
     >>> pyeeg.embed_seq(a,1,4)
-    array([[ 0.,  1.,  2.,  3.],
-           [ 1.,  2.,  3.,  4.],
-           [ 2.,  3.,  4.,  5.],
-           [ 3.,  4.,  5.,  6.],
-           [ 4.,  5.,  6.,  7.],
-           [ 5.,  6.,  7.,  8.]])
+    array([[0,  1,  2,  3],
+           [1,  2,  3,  4],
+           [2,  3,  4,  5],
+           [3,  4,  5,  6],
+           [4,  5,  6,  7],
+           [5,  6,  7,  8]])
     >>> pyeeg.embed_seq(a,2,3)
-    array([[ 0.,  2.,  4.],
-           [ 1.,  3.,  5.],
-           [ 2.,  4.,  6.],
-           [ 3.,  5.,  7.],
-           [ 4.,  6.,  8.]])
+    array([[0,  2,  4],
+           [1,  3,  5],
+           [2,  4,  6],
+           [3,  5,  7],
+           [4,  6,  8]])
     >>> pyeeg.embed_seq(a,4,1)
-    array([[ 0.],
-           [ 1.],
-           [ 2.],
-           [ 3.],
-           [ 4.],
-           [ 5.],
-           [ 6.],
-           [ 7.],
-           [ 8.]])
+    array([[0],
+           [1],
+           [2],
+           [3],
+           [4],
+           [5],
+           [6],
+           [7],
+           [8]])
 
     """
     if not type(time_series) == numpy.ndarray:
@@ -84,3 +84,7 @@ def embed_seq(time_series, tau, embedding_dimension):
         shape=shape,
         strides=strides
     )
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(verbose=True)
