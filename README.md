@@ -41,4 +41,7 @@ Run the test suite contained in `tests/`.
 $ python setup.py test
 ```
 
-
+Cite
+------
+If you use PyEEG in your research, please cite this paper: 
+[PyEEG: An Open Source Python Module for EEG/MEG Feature Extraction](https://www.hindawi.com/journals/cin/2011/406391/), Forrest Sheng Bao, Xin Liu, and Christina Zhang, Computational Intelligence and Neuroscience, volume 2011, Article ID 406391 
