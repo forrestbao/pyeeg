@@ -312,7 +312,7 @@ def samp_entropy(X, M, R):
 
     N = len(X)
 
-    Em = embed_seq(X, 1, M)
+    Em = embed_seq(X, 1, M)[:-1]
     A = numpy.tile(Em, (len(Em), 1, 1))
     B = numpy.transpose(A, [1, 0, 2])
     D = numpy.abs(A - B)  # D[i,j,k] = |Em[i][k] - Em[j][k]|
@@ -324,7 +324,7 @@ def samp_entropy(X, M, R):
         numpy.tile(X[M:], (N - M, 1)) - numpy.tile(X[M:], (N - M, 1)).T
     )
 
-    Cmp = numpy.logical_and(Dp <= R, InRange[:-1, :-1]).sum(axis=0)
+    Cmp = numpy.logical_and(Dp <= R, InRange).sum(axis=0)
 
     # Avoid taking log(0)
     Samp_En = numpy.log(numpy.sum(Cm + 1e-100) / numpy.sum(Cmp + 1e-100))
